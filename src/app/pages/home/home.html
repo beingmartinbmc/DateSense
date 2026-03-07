@@ -33,18 +33,22 @@
           </ng-template>
 
           <div class="tab-body">
-            <app-upload-area (fileSelected)="onFileSelected($event)" />
+            <app-upload-area (filesSelected)="onFilesSelected($event)" />
 
-            @if (previewUrl()) {
+            @if (filePreviews().length > 0) {
               <div class="preview-section">
-                <app-image-preview
-                  [imageUrl]="previewUrl()!"
-                  [fileName]="selectedFile()!.name"
-                  (removed)="removeFile()"
-                />
+                <div class="preview-grid">
+                  @for (preview of filePreviews(); track $index) {
+                    <app-image-preview
+                      [imageUrl]="preview.url"
+                      [fileName]="preview.file.name"
+                      (removed)="removeFile($index)"
+                    />
+                  }
+                </div>
                 <div class="action-row">
                   <button mat-flat-button class="analyze-btn" (click)="analyze()">
-                    Analyze Conversation
+                    Analyze {{ filePreviews().length === 1 ? 'Screenshot' : filePreviews().length + ' Screenshots' }}
                   </button>
                 </div>
               </div>

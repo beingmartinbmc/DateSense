@@ -68,11 +68,16 @@
 
 .screenshot-card { border-radius: 16px !important; }
 
+.screenshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
 .screenshot-wrap {
   border-radius: 12px;
   overflow: hidden;
   background: #f8fafc;
-  display: inline-block;
 }
 
 .screenshot-img {

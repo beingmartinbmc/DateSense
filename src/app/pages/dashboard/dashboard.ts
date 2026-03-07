@@ -18,7 +18,7 @@ import { AnalysisResponse } from '../../services/api.service';
 })
 export class Dashboard implements OnInit {
   result = signal<AnalysisResponse | null>(null);
-  imageUrl = signal<string | null>(null);
+  imageUrls = signal<string[]>([]);
 
   constructor(private router: Router) {}
 
@@ -28,7 +28,7 @@ export class Dashboard implements OnInit {
 
     if (state?.result) {
       this.result.set(state.result);
-      this.imageUrl.set(state.imageUrl || null);
+      this.imageUrls.set(state.imageUrls || (state.imageUrl ? [state.imageUrl] : []));
     } else {
       this.router.navigate(['/']);
     }
