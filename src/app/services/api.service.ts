@@ -83,25 +83,29 @@ export class ApiService {
   }
 
   private parseResponse(raw: any): AnalysisResponse {
-    // The backend may return the JSON directly or wrapped in a text field
-    let data = raw;
+    let content: string | null = null;
 
-    if (typeof raw === 'string') {
-      data = JSON.parse(raw);
-    } else if (typeof raw?.text === 'string') {
-      // Strip markdown code fences if present
-      let text = raw.text.trim();
-      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-      data = JSON.parse(text);
-    } else if (typeof raw?.content === 'string') {
-      let text = raw.content.trim();
-      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-      data = JSON.parse(text);
-    } else if (raw?.choices?.[0]?.message?.content) {
-      let text = raw.choices[0].message.content.trim();
-      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-      data = JSON.parse(text);
+    // Backend wraps OpenAI response in { success, data: { choices: [...] } }
+    const root = raw?.data ?? raw;
+
+    if (root?.choices?.[0]?.message?.content) {
+      content = root.choices[0].message.content;
+    } else if (typeof root?.text === 'string') {
+      content = root.text;
+    } else if (typeof root?.content === 'string') {
+      content = root.content;
+    } else if (typeof raw === 'string') {
+      content = raw;
     }
+
+    if (!content) {
+      throw new Error('Could not extract AI response');
+    }
+
+    // Strip markdown code fences if present
+    let text = content.trim();
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const data = JSON.parse(text);
 
     return {
       attraction_score: Number(data.attraction_score) || 0,
