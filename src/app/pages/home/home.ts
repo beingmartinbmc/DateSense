@@ -13,6 +13,11 @@ import { ApiService, AnalysisResponse, ManualInputData as ManualInputPayload } f
 
 export type InputMode = 'screenshot' | 'manual';
 
+export interface FilePreview {
+  file: File;
+  url: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -22,8 +27,7 @@ export type InputMode = 'screenshot' | 'manual';
 })
 export class Home {
   activeTab = signal<InputMode>('screenshot');
-  selectedFile = signal<File | null>(null);
-  previewUrl = signal<string | null>(null);
+  filePreviews = signal<FilePreview[]>([]);
   manualData = signal<ManualInputData | null>(null);
   isLoading = signal(false);
   loadingMessage = signal('');
@@ -46,18 +50,20 @@ export class Home {
     this.errorMessage.set(null);
   }
 
-  onFileSelected(file: File): void {
-    this.selectedFile.set(file);
+  onFilesSelected(files: File[]): void {
     this.errorMessage.set(null);
-    const url = URL.createObjectURL(file);
-    this.previewUrl.set(url);
+    const newPreviews = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    this.filePreviews.update((existing) => [...existing, ...newPreviews]);
   }
 
-  removeFile(): void {
-    const url = this.previewUrl();
-    if (url) URL.revokeObjectURL(url);
-    this.selectedFile.set(null);
-    this.previewUrl.set(null);
+  removeFile(index: number): void {
+    this.filePreviews.update((list) => {
+      URL.revokeObjectURL(list[index].url);
+      return list.filter((_, i) => i !== index);
+    });
     this.errorMessage.set(null);
   }
 
@@ -67,18 +73,21 @@ export class Home {
   }
 
   analyze(): void {
-    const file = this.selectedFile();
-    if (!file) return;
+    const previews = this.filePreviews();
+    if (previews.length === 0) return;
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.cycleLoadingMessages();
 
-    this.apiService.analyzeScreenshot(file).subscribe({
+    const files = previews.map((p) => p.file);
+    const imageUrls = previews.map((p) => p.url);
+
+    this.apiService.analyzeScreenshots(files).subscribe({
       next: (response: AnalysisResponse) => {
         this.isLoading.set(false);
         this.router.navigate(['/dashboard'], {
-          state: { result: response, imageUrl: this.previewUrl() },
+          state: { result: response, imageUrls },
         });
       },
       error: () => {

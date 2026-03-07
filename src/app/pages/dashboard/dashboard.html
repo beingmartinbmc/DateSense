@@ -35,13 +35,17 @@
       <!-- Date Ideas -->
       <app-date-ideas [ideas]="r.date_ideas" />
 
-      <!-- Screenshot Preview -->
-      @if (imageUrl()) {
+      <!-- Screenshot Previews -->
+      @if (imageUrls().length > 0) {
         <mat-card appearance="outlined" class="screenshot-card">
           <mat-card-content>
-            <h3 class="section-title">Conversation Screenshot</h3>
-            <div class="screenshot-wrap">
-              <img [src]="imageUrl()" alt="Chat screenshot" class="screenshot-img" />
+            <h3 class="section-title">Conversation Screenshots</h3>
+            <div class="screenshot-grid">
+              @for (url of imageUrls(); track $index) {
+                <div class="screenshot-wrap">
+                  <img [src]="url" [alt]="'Chat screenshot ' + ($index + 1)" class="screenshot-img" />
+                </div>
+              }
             </div>
           </mat-card-content>
         </mat-card>

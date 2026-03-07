@@ -34,29 +34,40 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  analyzeScreenshot(file: File): Observable<AnalysisResponse> {
+  analyzeScreenshots(files: File[]): Observable<AnalysisResponse> {
     return new Observable<AnalysisResponse>((subscriber) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = (reader.result as string).split(',')[1];
-        const mimeType = file.type || 'image/png';
+      const promises = files.map(
+        (file) =>
+          new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve({
+                base64: (reader.result as string).split(',')[1],
+                mimeType: file.type || 'image/png',
+              });
+            };
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+          }),
+      );
 
-        const body = {
-          prompt: buildScreenshotPrompt(),
-          context: DATESENSE_SYSTEM_CONTEXT,
-          images: [{ base64, mimeType }],
-        };
+      Promise.all(promises)
+        .then((images) => {
+          const body = {
+            prompt: buildScreenshotPrompt(),
+            context: DATESENSE_SYSTEM_CONTEXT,
+            images,
+          };
 
-        this.http
-          .post<any>(this.apiUrl, body)
-          .pipe(map((res) => this.parseResponse(res)))
-          .subscribe({
-            next: (v) => { subscriber.next(v); subscriber.complete(); },
-            error: (e) => subscriber.error(e),
-          });
-      };
-      reader.onerror = () => subscriber.error(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
+          this.http
+            .post<any>(this.apiUrl, body)
+            .pipe(map((res) => this.parseResponse(res)))
+            .subscribe({
+              next: (v) => { subscriber.next(v); subscriber.complete(); },
+              error: (e) => subscriber.error(e),
+            });
+        })
+        .catch((e) => subscriber.error(e));
     });
   }
 

@@ -12,6 +12,7 @@
       #fileInput
       type="file"
       accept=".png,.jpg,.jpeg"
+      multiple
       style="display:none"
       (change)="onFileInput($event)"
     />
@@ -19,8 +20,8 @@
     <div class="upload-icon-circle">
       <mat-icon class="upload-icon">add_photo_alternate</mat-icon>
     </div>
-    <p class="upload-title">Drag & drop your chat screenshot here</p>
-    <p class="upload-subtitle">or click to browse &middot; PNG, JPG up to 10MB</p>
+    <p class="upload-title">Drag & drop your chat screenshots here</p>
+    <p class="upload-subtitle">or click to browse &middot; PNG, JPG up to 10MB &middot; multiple files OK</p>
   </mat-card-content>
 </mat-card>
 

@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './upload-area.css',
 })
 export class UploadArea {
-  fileSelected = output<File>();
+  filesSelected = output<File[]>();
   isDragging = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -36,31 +36,36 @@ export class UploadArea {
     this.isDragging.set(false);
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.validateAndEmit(files[0]);
+      this.validateAndEmit(Array.from(files));
     }
   }
 
   onFileInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.validateAndEmit(input.files[0]);
+      this.validateAndEmit(Array.from(input.files));
       input.value = '';
     }
   }
 
-  private validateAndEmit(file: File): void {
+  private validateAndEmit(files: File[]): void {
     this.errorMessage.set(null);
+    const valid: File[] = [];
 
-    if (!this.allowedTypes.includes(file.type)) {
-      this.errorMessage.set('Unsupported file format. Please upload PNG or JPG.');
-      return;
+    for (const file of files) {
+      if (!this.allowedTypes.includes(file.type)) {
+        this.errorMessage.set('Unsupported file format. Please upload PNG or JPG.');
+        return;
+      }
+      if (file.size > this.maxSize) {
+        this.errorMessage.set('File too large. Maximum size is 10MB per file.');
+        return;
+      }
+      valid.push(file);
     }
 
-    if (file.size > this.maxSize) {
-      this.errorMessage.set('File too large. Maximum size is 10MB.');
-      return;
+    if (valid.length > 0) {
+      this.filesSelected.emit(valid);
     }
-
-    this.fileSelected.emit(file);
   }
 }
