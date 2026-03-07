@@ -41,29 +41,7 @@ jobs:
     - name: Create .nojekyll and 404.html for SPA routing
       run: |
         touch dist/DateSense/.nojekyll
-        cat > dist/DateSense/404.html << 'EOF'
-        <!doctype html>
-        <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <title>DateSense</title>
-          <base href="/DateSense/">
-          <meta content="width=device-width, initial-scale=1" name="viewport">
-          <script>
-            var pathSegmentsToKeep = 1;
-            var l = window.location;
-            l.replace(
-              l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-              l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-              l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-              (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-              l.hash
-            );
-          </script>
-        </head>
-        <body></body>
-        </html>
-        EOF
+        cp dist/DateSense/index.html dist/DateSense/404.html
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
