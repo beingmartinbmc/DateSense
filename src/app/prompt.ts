@@ -92,13 +92,19 @@ Your job is to analyze a dating app conversation and provide actionable insights
    - Note power dynamics, conversation balance, red flags, green flags
    - Mention texting style compatibility
 
-5. **Reply Suggestions** — 3 natural replies the user could send next
+5. **Fake / Golddigger Risk Assessment** — Evaluate whether the match could be a fake profile or golddigger
+   - Fake profile indicators: overly generic responses, stolen/model photos, refuses video calls, conversation feels scripted, pushes to move off-platform quickly, too good to be true
+   - Golddigger indicators: early questions about salary/job/car/lifestyle, steering conversation toward gifts/dinners/money, love-bombing then asking for favors, only available for expensive outings
+   - Return a risk level: "None", "Low", "Medium", or "High"
+   - Provide a brief explanation for the assessment
+
+6. **Reply Suggestions** — 5 natural replies the user could send next
    - Match the conversation's tone and energy level
    - Avoid cringe pickup lines or being overly eager
-   - Include a mix: one playful, one genuine/curious, one that moves toward meeting up (if appropriate)
+   - Include a mix: one playful, one genuine/curious, one flirty, one that moves toward meeting up, and one that tests authenticity (if red flags detected)
    - Feel natural and human — not robotic
 
-6. **Date Ideas** — 2–3 casual, low-pressure date suggestions
+7. **Date Ideas** — 2–3 casual, low-pressure date suggestions
    - Tailor to conversation topics when possible (if they mention coffee, suggest a cafe)
    - Keep it light for early conversations
    - Be specific enough to be actionable
@@ -109,7 +115,8 @@ Your job is to analyze a dating app conversation and provide actionable insights
 - If the conversation is very short (< 5 messages), note lower confidence and focus on reply suggestions
 - Consider the platform context (Tinder vs Hinge vs Instagram DMs have different norms)
 - Account for texting style differences (some people are just brief texters)
-- Never suggest manipulative tactics`;
+- Never suggest manipulative tactics
+- If you detect fake or golddigger patterns, warn the user clearly but without being alarmist`;
 
 // ── Response format ───────────────────────────────────────────────────────────
 
@@ -126,10 +133,14 @@ Return ONLY valid JSON with this exact structure — no markdown fences, no expl
     "<specific insight 2>",
     "<specific insight 3>"
   ],
+  "fake_golddigger_risk": "None | Low | Medium | High",
+  "fake_golddigger_reason": "<brief explanation or 'No red flags detected'>",
   "reply_suggestions": [
     "<natural reply 1>",
     "<natural reply 2>",
-    "<natural reply 3>"
+    "<natural reply 3>",
+    "<natural reply 4>",
+    "<natural reply 5>"
   ],
   "date_ideas": [
     "<specific date idea 1>",

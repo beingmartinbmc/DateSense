@@ -8,6 +8,8 @@ export interface AnalysisResponse {
   ghosting_risk: number;
   conversation_health: number;
   insights: string[];
+  fake_golddigger_risk: string;
+  fake_golddigger_reason: string;
   reply_suggestions: string[];
   date_ideas: string[];
 }
@@ -123,6 +125,8 @@ export class ApiService {
       ghosting_risk: Number(data.ghosting_risk) || 0,
       conversation_health: Number(data.conversation_health) || 0,
       insights: Array.isArray(data.insights) ? data.insights : [],
+      fake_golddigger_risk: data.fake_golddigger_risk || 'None',
+      fake_golddigger_reason: data.fake_golddigger_reason || 'No red flags detected',
       reply_suggestions: Array.isArray(data.reply_suggestions) ? data.reply_suggestions : [],
       date_ideas: Array.isArray(data.date_ideas) ? data.date_ideas : [],
     };
