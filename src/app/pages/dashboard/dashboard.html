@@ -29,6 +29,18 @@
         </mat-card-content>
       </mat-card>
 
+      <!-- Fake / Golddigger Risk -->
+      <mat-card appearance="outlined" class="risk-card" [class.risk-none]="r.fake_golddigger_risk === 'None'" [class.risk-low]="r.fake_golddigger_risk === 'Low'" [class.risk-medium]="r.fake_golddigger_risk === 'Medium'" [class.risk-high]="r.fake_golddigger_risk === 'High'">
+        <mat-card-content class="risk-content">
+          <div class="risk-header">
+            <mat-icon class="risk-icon">shield</mat-icon>
+            <h3 class="risk-title">Fake / Golddigger Risk</h3>
+            <span class="risk-badge">{{ r.fake_golddigger_risk }}</span>
+          </div>
+          <p class="risk-reason">{{ r.fake_golddigger_reason }}</p>
+        </mat-card-content>
+      </mat-card>
+
       <!-- Reply Suggestions -->
       <app-reply-list [replies]="r.reply_suggestions" />
 
