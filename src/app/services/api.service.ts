@@ -30,7 +30,7 @@ export interface ManualInputData {
 })
 export class ApiService {
   private readonly apiUrl =
-    'https://epic-backend-fp9aqm99k-beingmartinbmcs-projects.vercel.app/api/generic-vision';
+    'https://epic-backend-f9tfcyn1d-beingmartinbmcs-projects.vercel.app/api/generic-vision';
 
   constructor(private http: HttpClient) {}
 
