@@ -1,0 +1,20 @@
+<mat-card appearance="outlined" class="reply-card">
+  <mat-card-content>
+    <h3 class="section-title">Suggested Replies</h3>
+    <div class="reply-list">
+      @for (reply of replies(); track $index) {
+        <div class="reply-row">
+          <div class="reply-body">
+            <span class="reply-num">{{ $index + 1 }}</span>
+            <p class="reply-text">{{ reply }}</p>
+          </div>
+          <button mat-stroked-button class="copy-btn" [class.copied]="copiedIndex() === $index"
+            (click)="copyReply(reply, $index)">
+            <mat-icon>{{ copiedIndex() === $index ? 'check' : 'content_copy' }}</mat-icon>
+            {{ copiedIndex() === $index ? 'Copied' : 'Copy' }}
+          </button>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

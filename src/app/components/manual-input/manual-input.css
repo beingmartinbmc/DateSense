@@ -1,0 +1,26 @@
+:host { display: block; }
+
+.manual-card { border-radius: 16px !important; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+.full-width { width: 100%; }
+
+.optional-label {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #9ca3af;
+}
+
+.required-star {
+  color: #ec4899;
+}

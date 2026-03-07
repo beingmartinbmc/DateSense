@@ -1,0 +1,62 @@
+/* Global app styles — all layout via Angular Material + plain CSS */
+
+.page-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page-container-wide {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.analyze-btn {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  padding: 0 32px !important;
+  height: 48px !important;
+  font-size: 14px !important;
+  border-radius: 24px !important;
+}
+
+.analyze-btn:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+}
+
+.score-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.score-bar-fill.pink { background: linear-gradient(90deg, #ec4899, #f472b6); }
+.score-bar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.score-bar-fill.emerald { background: linear-gradient(90deg, #10b981, #34d399); }

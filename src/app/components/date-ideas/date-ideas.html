@@ -1,0 +1,13 @@
+<mat-card appearance="outlined" class="ideas-card">
+  <mat-card-content>
+    <h3 class="section-title">Date Ideas</h3>
+    <div class="ideas-grid">
+      @for (idea of ideas(); track $index) {
+        <div class="idea-item">
+          <span class="idea-emoji">{{ emojiFor($index) }}</span>
+          <p class="idea-text">{{ idea }}</p>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,13 @@
+<mat-card class="preview-card" appearance="outlined">
+  <mat-card-content class="preview-content">
+    <div class="preview-img-wrap">
+      <img [src]="imageUrl()" [alt]="fileName()" class="preview-img" />
+    </div>
+    <div class="preview-footer">
+      <span class="preview-filename">{{ fileName() }}</span>
+      <button mat-button color="warn" (click)="removed.emit(); $event.stopPropagation()">
+        <mat-icon>close</mat-icon> Remove
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
