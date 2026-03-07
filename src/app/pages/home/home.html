@@ -1,0 +1,81 @@
+<div class="home-page">
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span class="badge-text">AI-Powered Analysis</span>
+    </div>
+    <h1 class="title gradient-text">DateSense</h1>
+    <p class="subtitle">
+      Upload a chat screenshot or enter conversation details to analyze attraction, ghosting risk, and conversation health.
+    </p>
+  </div>
+
+  <!-- Main Content -->
+  <div class="page-container">
+    @if (isLoading()) {
+      <mat-card class="loading-card" appearance="outlined">
+        <mat-card-content class="loading-content">
+          <mat-spinner diameter="48" color="primary"></mat-spinner>
+          <p class="loading-text">{{ loadingMessage() }}</p>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <!-- Tab Toggle -->
+      <mat-tab-group class="input-tabs" animationDuration="200ms"
+        [selectedIndex]="activeTab() === 'screenshot' ? 0 : 1"
+        (selectedIndexChange)="switchTab($event === 0 ? 'screenshot' : 'manual')">
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span class="tab-label-text">Screenshot</span>
+          </ng-template>
+
+          <div class="tab-body">
+            <app-upload-area (fileSelected)="onFileSelected($event)" />
+
+            @if (previewUrl()) {
+              <div class="preview-section">
+                <app-image-preview
+                  [imageUrl]="previewUrl()!"
+                  [fileName]="selectedFile()!.name"
+                  (removed)="removeFile()"
+                />
+                <div class="action-row">
+                  <button mat-flat-button class="analyze-btn" (click)="analyze()">
+                    Analyze Conversation
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>edit_note</mat-icon>
+            <span class="tab-label-text">Manual Input</span>
+          </ng-template>
+
+          <div class="tab-body">
+            <app-manual-input #manualInput (submitted)="onManualSubmit($event)" />
+            <div class="action-row">
+              <button mat-flat-button class="analyze-btn" (click)="manualInput.onSubmit()">
+                Analyze Conversation
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      @if (errorMessage()) {
+        <mat-card class="error-banner">
+          <mat-card-content>
+            <p class="error-text"><mat-icon>error_outline</mat-icon> {{ errorMessage() }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+</div>

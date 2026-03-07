@@ -1,0 +1,73 @@
+<mat-card appearance="outlined" class="manual-card">
+  <mat-card-content>
+    <!-- Profile Section -->
+    <h3 class="section-title">Profile Details</h3>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Your Name</mat-label>
+        <input matInput placeholder="e.g. Alex" [ngModel]="yourName()" (ngModelChange)="yourName.set($event)" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Their Name</mat-label>
+        <input matInput placeholder="e.g. Jordan" [ngModel]="theirName()" (ngModelChange)="theirName.set($event)" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Your Age</mat-label>
+        <input matInput placeholder="e.g. 25" [ngModel]="yourAge()" (ngModelChange)="yourAge.set($event)" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Their Age</mat-label>
+        <input matInput placeholder="e.g. 27" [ngModel]="theirAge()" (ngModelChange)="theirAge.set($event)" />
+      </mat-form-field>
+    </div>
+
+    <!-- Conversation Info -->
+    <h3 class="section-title" style="margin-top:24px">Conversation Info</h3>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Platform</mat-label>
+        <mat-select [ngModel]="platform()" (ngModelChange)="platform.set($event)">
+          @for (p of platforms; track p) {
+            <mat-option [value]="p">{{ p }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Chat Duration</mat-label>
+        <input matInput placeholder="e.g. 3 days, 2 weeks" [ngModel]="chatDuration()" (ngModelChange)="chatDuration.set($event)" />
+      </mat-form-field>
+    </div>
+
+    <!-- Bios -->
+    <h3 class="section-title" style="margin-top:24px">Profile Bios <span class="optional-label">(optional)</span></h3>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Your Bio</mat-label>
+        <textarea matInput rows="3" placeholder="Paste your dating profile bio..." [ngModel]="yourBio()" (ngModelChange)="yourBio.set($event)"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Their Bio</mat-label>
+        <textarea matInput rows="3" placeholder="Paste their dating profile bio..." [ngModel]="theirBio()" (ngModelChange)="theirBio.set($event)"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Chat Messages -->
+    <h3 class="section-title" style="margin-top:24px">Chat Messages <span class="required-star">*</span></h3>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Conversation</mat-label>
+      <textarea matInput rows="7"
+        placeholder="You: Hey! How's it going?&#10;Them: Pretty good! Just got back from a hike&#10;You: Nice! Where did you go?"
+        [ngModel]="chatMessages()" (ngModelChange)="chatMessages.set($event)"></textarea>
+      <mat-hint>Paste messages in any format. Label each message with who sent it.</mat-hint>
+    </mat-form-field>
+
+    <!-- Additional Context -->
+    <h3 class="section-title" style="margin-top:24px">Additional Context <span class="optional-label">(optional)</span></h3>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Context</mat-label>
+      <textarea matInput rows="2"
+        placeholder="e.g. 'We matched 3 days ago', 'They haven't replied in 2 days'..."
+        [ngModel]="additionalContext()" (ngModelChange)="additionalContext.set($event)"></textarea>
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,33 @@
+<mat-card
+  class="upload-zone"
+  [class.dragging]="isDragging()"
+  appearance="outlined"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+  (click)="fileInput.click()"
+>
+  <mat-card-content class="upload-content">
+    <input
+      #fileInput
+      type="file"
+      accept=".png,.jpg,.jpeg"
+      style="display:none"
+      (change)="onFileInput($event)"
+    />
+
+    <div class="upload-icon-circle">
+      <mat-icon class="upload-icon">add_photo_alternate</mat-icon>
+    </div>
+    <p class="upload-title">Drag & drop your chat screenshot here</p>
+    <p class="upload-subtitle">or click to browse &middot; PNG, JPG up to 10MB</p>
+  </mat-card-content>
+</mat-card>
+
+@if (errorMessage()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <p class="error-text"><mat-icon class="error-icon">error_outline</mat-icon> {{ errorMessage() }}</p>
+    </mat-card-content>
+  </mat-card>
+}

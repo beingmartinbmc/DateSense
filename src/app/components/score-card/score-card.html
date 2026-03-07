@@ -1,0 +1,14 @@
+<mat-card class="score-card" appearance="outlined">
+  <mat-card-content>
+    <div class="score-header">
+      <span class="score-dot" [ngClass]="color()"></span>
+      <span class="score-label">{{ label() }}</span>
+    </div>
+    <p class="score-value" [ngClass]="color()">
+      {{ score() }}<span class="score-percent">%</span>
+    </p>
+    <div class="score-bar-track">
+      <div class="score-bar-fill" [ngClass]="color()" [style.width.%]="score()"></div>
+    </div>
+  </mat-card-content>
+</mat-card>

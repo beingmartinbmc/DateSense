@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.ideas-card { border-radius: 16px !important; }
+
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .ideas-grid { grid-template-columns: 1fr; }
+}
+
+.idea-item {
+  background: linear-gradient(135deg, #fdf2f8, #f5f3ff);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  border: 1px solid #f3e8ff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.idea-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+.idea-emoji {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.idea-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
