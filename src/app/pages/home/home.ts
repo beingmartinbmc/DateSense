@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -25,7 +25,7 @@ export interface FilePreview {
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {
+export class Home implements OnInit {
   activeTab = signal<InputMode>('screenshot');
   filePreviews = signal<FilePreview[]>([]);
   manualData = signal<ManualInputData | null>(null);
@@ -44,6 +44,15 @@ export class Home {
     private apiService: ApiService,
     private router: Router,
   ) {}
+
+  ngOnInit(): void {
+    this.incrementFlagCounter();
+  }
+
+  private incrementFlagCounter(): void {
+    const img = new Image();
+    img.src = 'https://s01.flagcounter.com/count2/giRi/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/';
+  }
 
   switchTab(tab: InputMode): void {
     this.activeTab.set(tab);
