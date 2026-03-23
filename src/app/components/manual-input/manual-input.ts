@@ -43,8 +43,30 @@ export class ManualInput {
 
   platforms = ['Tinder', 'Bumble', 'Hinge', 'Instagram', 'WhatsApp', 'iMessage', 'Other'];
 
+  readonly maxMessageLength = 10000;
+  readonly maxFieldLength = 200;
+  validationError = signal('');
+
   get isValid(): boolean {
-    return this.chatMessages().trim().length > 0;
+    const messages = this.chatMessages().trim();
+    if (messages.length === 0) {
+      this.validationError.set('Chat messages are required.');
+      return false;
+    }
+    if (messages.length > this.maxMessageLength) {
+      this.validationError.set(`Chat messages must be under ${this.maxMessageLength} characters.`);
+      return false;
+    }
+    if (this.yourName().length > this.maxFieldLength ||
+        this.theirName().length > this.maxFieldLength ||
+        this.yourBio().length > 1000 ||
+        this.theirBio().length > 1000 ||
+        this.additionalContext().length > 1000) {
+      this.validationError.set('One or more fields exceed the maximum length.');
+      return false;
+    }
+    this.validationError.set('');
+    return true;
   }
 
   onSubmit(): void {

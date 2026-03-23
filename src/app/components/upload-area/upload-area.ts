@@ -15,8 +15,9 @@ export class UploadArea {
   isDragging = signal(false);
   errorMessage = signal<string | null>(null);
 
-  private readonly allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+  private readonly allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
   private readonly maxSize = 10 * 1024 * 1024; // 10MB
+  private readonly maxFiles = 10;
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -50,11 +51,17 @@ export class UploadArea {
 
   private validateAndEmit(files: File[]): void {
     this.errorMessage.set(null);
+
+    if (files.length > this.maxFiles) {
+      this.errorMessage.set(`Maximum ${this.maxFiles} files allowed at once.`);
+      return;
+    }
+
     const valid: File[] = [];
 
     for (const file of files) {
       if (!this.allowedTypes.includes(file.type)) {
-        this.errorMessage.set('Unsupported file format. Please upload PNG or JPG.');
+        this.errorMessage.set('Unsupported file format. Please upload PNG, JPG, or WebP.');
         return;
       }
       if (file.size > this.maxSize) {
