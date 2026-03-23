@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 
@@ -11,6 +11,8 @@ import { MatCardModule } from '@angular/material/card';
 })
 export class DateIdeas {
   ideas = input.required<string[]>();
+
+  uniqueIdeas = computed(() => [...new Set(this.ideas())]);
 
   readonly emojis = ['☕', '🚶', '📸', '🎵', '🎨', '🍕'];
 
