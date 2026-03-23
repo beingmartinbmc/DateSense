@@ -2,7 +2,7 @@
   <mat-card-content>
     <h3 class="section-title">Date Ideas</h3>
     <div class="ideas-grid">
-      @for (idea of ideas(); track $index) {
+      @for (idea of uniqueIdeas(); track $index) {
         <div class="idea-item">
           <span class="idea-emoji">{{ emojiFor($index) }}</span>
           <p class="idea-text">{{ idea }}</p>

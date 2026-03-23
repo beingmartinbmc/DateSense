@@ -127,9 +127,10 @@ Craft replies that sound like a REAL HUMAN wrote them, not a bot:
 - Include this MIX: (1) playful/witty, (2) genuinely curious question, (3) subtly flirty, (4) moves toward meeting up, (5) tests authenticity IF red flags were detected — otherwise another strong option
 - Every reply must feel like something a confident, socially aware person would actually send
 
-### 7. Date Ideas — Generate 2-3
-Suggest SPECIFIC, actionable date ideas:
-- Mine the conversation for hooks — if they mentioned coffee, suggest a specific type of cafe date. If they mentioned hiking, suggest a trail hangout
+### 7. Date Ideas — Generate 2-3 UNIQUE ideas
+Suggest SPECIFIC, actionable date ideas DERIVED FROM the actual conversation:
+- Every idea MUST connect to something specifically mentioned in the chat — a hobby, interest, food preference, place, activity, or topic they discussed. NO generic ideas that ignore the conversation.
+- Each idea must be DISTINCT — no repeats or slight variations of the same activity
 - Keep it CASUAL and LOW-PRESSURE for early conversations — no "romantic dinner for two" on match day 1
 - Be specific enough to actually use: "Grab matcha at a cute cafe and people-watch" NOT "Maybe get coffee sometime"
 
