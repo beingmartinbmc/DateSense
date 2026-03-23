@@ -1,59 +1,44 @@
 # DateSense
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+AI-powered dating conversation analyzer. Upload a chat screenshot or paste your conversation to get brutally honest insights on attraction, ghosting risk, and what to say next.
 
-## Development server
+**Live:** Deployed on GitHub Pages via CI/CD.
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
-```
+- **Screenshot Analysis** — Upload PNG/JPG/WebP screenshots of dating app conversations. Supports multiple images at once.
+- **Manual Input** — Paste conversation text with optional profile context (names, ages, platform, bios).
+- **Conversation Health Score** — 0-100 rating of how balanced and engaging the conversation is.
+- **Attraction Score** — Evidence-based assessment of how interested the match seems.
+- **Ghosting Risk** — Predictive probability the match will stop responding.
+- **Fake / Golddigger Detection** — Risk assessment for fake profiles and transactional behavior.
+- **Reply Suggestions** — 5 natural, tone-matched replies you can copy and send.
+- **Date Ideas** — Casual, conversation-tailored date suggestions.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Tech Stack
 
-## Code scaffolding
+- Angular 21 (standalone components, signals)
+- Angular Material (Material 3 theming)
+- TypeScript 5.9
+- OpenAI Vision API (via backend proxy)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Development
 
 ```bash
-ng build
+npm install
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Opens at `http://localhost:4200/`.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Build artifacts go to `dist/DateSense/`.
 
-For end-to-end (e2e) testing, run:
+## Deployment
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Automatically deployed to GitHub Pages on push to `main` via `.github/workflows/deploy.yml`.

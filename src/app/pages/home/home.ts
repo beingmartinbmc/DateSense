@@ -59,8 +59,15 @@ export class Home implements OnInit {
     this.errorMessage.set(null);
   }
 
+  private readonly maxTotalFiles = 10;
+
   onFilesSelected(files: File[]): void {
     this.errorMessage.set(null);
+    const current = this.filePreviews().length;
+    if (current + files.length > this.maxTotalFiles) {
+      this.errorMessage.set(`Maximum ${this.maxTotalFiles} screenshots allowed.`);
+      return;
+    }
     const newPreviews = files.map((file) => ({
       file,
       url: URL.createObjectURL(file),
