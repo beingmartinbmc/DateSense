@@ -198,6 +198,8 @@ const RESPONSE_FORMAT = `## MANDATORY Output Format
 
 Return ONLY a valid JSON object. NOTHING else. No markdown fences. No explanation. No preamble. No trailing text. If you output ANYTHING other than the raw JSON object, you have FAILED.
 
+Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST use plain double quotes (") only. NEVER use curly quotes like “ ” or ‘ ’ anywhere in the JSON.
+
 {
   "conversation_health": <number 0-100>,
   "attraction_score": <number 0-100>,

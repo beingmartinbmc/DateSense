@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -106,9 +107,10 @@ export class Home implements OnInit {
           state: { result: response, imageUrls },
         });
       },
-      error: () => {
+      error: (error) => {
+        console.error('Screenshot analysis failed', error);
         this.isLoading.set(false);
-        this.errorMessage.set('Analysis failed. Please retry.');
+        this.errorMessage.set(this.getErrorMessage(error));
       },
     });
   }
@@ -125,11 +127,60 @@ export class Home implements OnInit {
           state: { result: response },
         });
       },
-      error: () => {
+      error: (error) => {
+        console.error('Manual analysis failed', error);
         this.isLoading.set(false);
-        this.errorMessage.set('Analysis failed. Please retry.');
+        this.errorMessage.set(this.getErrorMessage(error));
       },
     });
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = this.extractHttpErrorMessage(error.error);
+      if (backendMessage) {
+        return backendMessage;
+      }
+
+      if (typeof error.message === 'string' && error.message.trim().length > 0) {
+        return error.message;
+      }
+
+      return 'Analysis failed. Please retry.';
+    }
+
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return 'Analysis failed. Please retry.';
+  }
+
+  private extractHttpErrorMessage(value: unknown): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+      return normalized.length > 0 ? normalized : null;
+    }
+
+    if (typeof value !== 'object') {
+      return null;
+    }
+
+    const candidateRecord = value as Record<string, unknown>;
+    const keys = ['message', 'error', 'details'];
+
+    for (const key of keys) {
+      const candidate = candidateRecord[key];
+      if (typeof candidate === 'string' && candidate.trim().length > 0) {
+        return candidate.trim();
+      }
+    }
+
+    return null;
   }
 
   private cycleLoadingMessages(): void {
