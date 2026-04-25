@@ -190,12 +190,18 @@ export class ApiService {
 
   private parseJsonPayload(content: string): any {
     const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const repaired = this.repairPrematureObjectClose(cleaned);
     const extracted = this.extractJsonObject(cleaned);
+    const repairedExtracted = this.extractJsonObject(repaired);
 
     const candidates = [
       cleaned,
+      repaired,
+      repairedExtracted,
       extracted,
+      this.normalizeLikelyJson(repaired),
       this.normalizeLikelyJson(cleaned),
+      repairedExtracted ? this.normalizeLikelyJson(repairedExtracted) : null,
       extracted ? this.normalizeLikelyJson(extracted) : null,
     ].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0);
 
@@ -207,6 +213,80 @@ export class ApiService {
     }
 
     throw new Error('The AI returned an invalid response format. Please retry.');
+  }
+
+  private repairPrematureObjectClose(text: string): string {
+    let out = '';
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    let i = 0;
+    const len = text.length;
+
+    while (i < len) {
+      const ch = text[i];
+
+      if (inString) {
+        out += ch;
+        if (escaped) {
+          escaped = false;
+        } else if (ch === '\\') {
+          escaped = true;
+        } else if (ch === '"') {
+          inString = false;
+        }
+        i += 1;
+        continue;
+      }
+
+      if (ch === '"') {
+        inString = true;
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      if (ch === '{' || ch === '[') {
+        depth += 1;
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      if (ch === '}' && depth === 1) {
+        let j = i + 1;
+        while (j < len && /\s/.test(text[j])) {
+          j += 1;
+        }
+
+        if (j < len && text[j] === ',') {
+          let k = j + 1;
+          while (k < len && /\s/.test(text[k])) {
+            k += 1;
+          }
+          if (k < len && text[k] === '"') {
+            i += 1;
+            continue;
+          }
+        } else if (j < len && text[j] === '"') {
+          out += ',';
+          i += 1;
+          continue;
+        }
+      }
+
+      if (ch === '}' || ch === ']') {
+        depth -= 1;
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      out += ch;
+      i += 1;
+    }
+
+    return out;
   }
 
   private tryParseJson(text: string): any | null {

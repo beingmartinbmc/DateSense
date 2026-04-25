@@ -212,7 +212,9 @@ const RESPONSE_FORMAT = `## MANDATORY Output Format
 
 Return ONLY a valid JSON object. NOTHING else. No markdown fences. No explanation. No preamble. No trailing text. If you output ANYTHING other than the raw JSON object, you have FAILED.
 
-Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST use plain double quotes (") only. NEVER use curly quotes like “ ” or ‘ ’ anywhere in the JSON.
+EVERY key listed below (conversation_health, attraction_score, ghosting_risk, response_effort_balance, meetup_readiness, confidence_score, conversation_stage, momentum, insights, green_flags, red_flags, fake_golddigger_risk, fake_golddigger_reason, next_move, reply_suggestions, date_ideas) MUST live inside the SAME single top-level JSON object. There is exactly ONE opening { and ONE closing } in the entire output. Do NOT close the object early. Do NOT emit additional siblings outside the object. Do NOT split the response into multiple objects.
+
+Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST use plain double quotes (") only. NEVER use curly quotes like “ ” or ‘ ’ anywhere in the JSON. Always include a comma between adjacent array elements.
 
 {
   "conversation_health": <number 0-100>,
