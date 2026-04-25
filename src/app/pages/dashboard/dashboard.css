@@ -29,12 +29,81 @@
 
 .scores-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
 }
 
 @media (max-width: 700px) {
   .scores-grid { grid-template-columns: 1fr; }
+}
+
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 780px) {
+  .snapshot-grid { grid-template-columns: 1fr; }
+}
+
+.snapshot-card,
+.next-move-card,
+.signals-card {
+  border-radius: 16px !important;
+}
+
+.snapshot-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.snapshot-pill {
+  min-width: 140px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.snapshot-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.snapshot-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.momentum-rising {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.momentum-flat {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.momentum-fading {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.next-move-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #374151;
 }
 
 .insights-card { border-radius: 16px !important; }
@@ -120,6 +189,65 @@
   margin: 12px 0 0;
   font-size: 14px;
   color: #4b5563;
+  line-height: 1.6;
+}
+
+.signals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 780px) {
+  .signals-grid { grid-template-columns: 1fr; }
+}
+
+.positive-signals {
+  border-color: #d1fae5 !important;
+}
+
+.warning-signals {
+  border-color: #fee2e2 !important;
+}
+
+.signals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.signal-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.positive-icon {
+  color: #10b981;
+}
+
+.warning-icon {
+  color: #ef4444;
+}
+
+.empty-state {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
   line-height: 1.6;
 }
 
