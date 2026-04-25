@@ -12,6 +12,38 @@
         <app-score-card label="Attraction Score" [score]="r.attraction_score" color="pink" />
         <app-score-card label="Ghosting Risk" [score]="r.ghosting_risk" color="amber" />
         <app-score-card label="Conversation Health" [score]="r.conversation_health" color="emerald" />
+        <app-score-card label="Effort Balance" [score]="r.response_effort_balance" color="violet" />
+        <app-score-card label="Meetup Readiness" [score]="r.meetup_readiness" color="sky" />
+        <app-score-card label="Analysis Confidence" [score]="r.confidence_score" color="rose" />
+      </div>
+
+      <div class="snapshot-grid">
+        <mat-card appearance="outlined" class="snapshot-card">
+          <mat-card-content>
+            <h3 class="section-title">Conversation Snapshot</h3>
+            <div class="snapshot-pills">
+              <div class="snapshot-pill">
+                <span class="snapshot-label">Stage</span>
+                <span class="snapshot-value">{{ r.conversation_stage }}</span>
+              </div>
+              <div class="snapshot-pill" [class.momentum-rising]="r.momentum === 'Rising'" [class.momentum-flat]="r.momentum === 'Flat'" [class.momentum-fading]="r.momentum === 'Fading'">
+                <span class="snapshot-label">Momentum</span>
+                <span class="snapshot-value">{{ r.momentum }}</span>
+              </div>
+              <div class="snapshot-pill">
+                <span class="snapshot-label">Risk Level</span>
+                <span class="snapshot-value">{{ r.fake_golddigger_risk }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="next-move-card">
+          <mat-card-content>
+            <h3 class="section-title">Recommended Next Move</h3>
+            <p class="next-move-text">{{ r.next_move }}</p>
+          </mat-card-content>
+        </mat-card>
       </div>
 
       <!-- Insights -->
@@ -40,6 +72,44 @@
           <p class="risk-reason">{{ r.fake_golddigger_reason }}</p>
         </mat-card-content>
       </mat-card>
+
+      <div class="signals-grid">
+        <mat-card appearance="outlined" class="signals-card positive-signals">
+          <mat-card-content>
+            <h3 class="section-title">Green Flags</h3>
+            @if (r.green_flags.length > 0) {
+              <ul class="signals-list">
+                @for (flag of r.green_flags; track $index) {
+                  <li class="signal-item">
+                    <mat-icon class="signal-icon positive-icon">trending_up</mat-icon>
+                    <span>{{ flag }}</span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="empty-state">No strong green flags detected yet.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="signals-card warning-signals">
+          <mat-card-content>
+            <h3 class="section-title">Red Flags</h3>
+            @if (r.red_flags.length > 0) {
+              <ul class="signals-list">
+                @for (flag of r.red_flags; track $index) {
+                  <li class="signal-item">
+                    <mat-icon class="signal-icon warning-icon">warning_amber</mat-icon>
+                    <span>{{ flag }}</span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="empty-state">No major red flags detected.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
 
       <!-- Reply Suggestions -->
       <app-reply-list [replies]="r.reply_suggestions" />

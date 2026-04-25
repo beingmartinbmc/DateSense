@@ -26,6 +26,9 @@ mat-card-content { padding: 20px !important; }
 .score-dot.pink   { background: #ec4899; }
 .score-dot.amber  { background: #f59e0b; }
 .score-dot.emerald { background: #10b981; }
+.score-dot.violet { background: #8b5cf6; }
+.score-dot.sky { background: #0ea5e9; }
+.score-dot.rose { background: #f43f5e; }
 
 .score-label {
   font-size: 12px;
@@ -44,6 +47,9 @@ mat-card-content { padding: 20px !important; }
 .score-value.pink   { color: #ec4899; }
 .score-value.amber  { color: #f59e0b; }
 .score-value.emerald { color: #10b981; }
+.score-value.violet { color: #8b5cf6; }
+.score-value.sky { color: #0ea5e9; }
+.score-value.rose { color: #f43f5e; }
 
 .score-percent {
   font-size: 22px;
@@ -66,3 +72,6 @@ mat-card-content { padding: 20px !important; }
 .score-bar-fill.pink   { background: linear-gradient(90deg, #ec4899, #f472b6); }
 .score-bar-fill.amber  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
 .score-bar-fill.emerald { background: linear-gradient(90deg, #10b981, #34d399); }
+.score-bar-fill.violet { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.score-bar-fill.sky { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.score-bar-fill.rose { background: linear-gradient(90deg, #f43f5e, #fb7185); }

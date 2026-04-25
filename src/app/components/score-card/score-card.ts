@@ -7,10 +7,10 @@ import { MatCardModule } from '@angular/material/card';
   standalone: true,
   imports: [CommonModule, MatCardModule],
   templateUrl: './score-card.html',
-  styleUrl: './score-card.css',
+  styleUrls: ['./score-card.css'],
 })
 export class ScoreCard {
   label = input.required<string>();
   score = input.required<number>();
-  color = input<'pink' | 'amber' | 'emerald'>('pink');
+  color = input<'pink' | 'amber' | 'emerald' | 'violet' | 'sky' | 'rose'>('pink');
 }
