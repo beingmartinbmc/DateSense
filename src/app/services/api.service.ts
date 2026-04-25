@@ -108,29 +108,8 @@ export class ApiService {
   }
 
   private parseResponse(raw: any): AnalysisResponse {
-    let content: string | null = null;
-
-    // Backend wraps OpenAI response in { success, data: { choices: [...] } }
-    const root = raw?.data ?? raw;
-
-    if (root?.choices?.[0]?.message?.content) {
-      content = root.choices[0].message.content;
-    } else if (typeof root?.text === 'string') {
-      content = root.text;
-    } else if (typeof root?.content === 'string') {
-      content = root.content;
-    } else if (typeof raw === 'string') {
-      content = raw;
-    }
-
-    if (!content) {
-      throw new Error('Could not extract AI response');
-    }
-
-    // Strip markdown code fences if present
-    let text = content.trim();
-    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-    const data = JSON.parse(text);
+    const content = this.extractContent(raw);
+    const data = this.parseJsonPayload(content);
 
     return {
       attraction_score: this.normalizeScore(data.attraction_score),
@@ -152,6 +131,224 @@ export class ApiService {
     };
   }
 
+  private extractContent(raw: any): string {
+    const root = raw?.data ?? raw;
+    const candidates = [
+      root?.choices?.[0]?.message?.content,
+      root?.output?.[0]?.content,
+      root?.output,
+      root?.output_text,
+      root?.text,
+      root?.content,
+      this.looksLikeAnalysisObject(root) ? JSON.stringify(root) : null,
+      this.looksLikeAnalysisObject(raw) ? JSON.stringify(raw) : null,
+      typeof raw === 'string' ? raw : null,
+    ];
+
+    for (const candidate of candidates) {
+      const normalized = this.stringifyContent(candidate);
+      if (normalized) {
+        return normalized;
+      }
+    }
+
+    throw new Error('Could not extract AI response');
+  }
+
+  private stringifyContent(value: unknown): string {
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+
+    if (!Array.isArray(value)) {
+      return '';
+    }
+
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+
+        if (!item || typeof item !== 'object') {
+          return '';
+        }
+
+        if ('text' in item && typeof item.text === 'string') {
+          return item.text;
+        }
+
+        if ('content' in item) {
+          return this.stringifyContent(item.content);
+        }
+
+        return '';
+      })
+      .join('\n')
+      .trim();
+  }
+
+  private parseJsonPayload(content: string): any {
+    const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const extracted = this.extractJsonObject(cleaned);
+
+    const candidates = [
+      cleaned,
+      extracted,
+      this.normalizeLikelyJson(cleaned),
+      extracted ? this.normalizeLikelyJson(extracted) : null,
+    ].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0);
+
+    for (const candidate of candidates) {
+      const parsed = this.tryParseJson(candidate);
+      if (parsed) {
+        return parsed;
+      }
+    }
+
+    throw new Error('The AI returned an invalid response format. Please retry.');
+  }
+
+  private tryParseJson(text: string): any | null {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  }
+
+  private extractJsonObject(text: string): string | null {
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escaped = false;
+
+    for (let index = 0; index < text.length; index += 1) {
+      const char = text[index];
+
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+
+        if (char === '\\') {
+          escaped = true;
+          continue;
+        }
+
+        if (char === '"') {
+          inString = false;
+        }
+
+        continue;
+      }
+
+      if (char === '"') {
+        inString = true;
+        continue;
+      }
+
+      if (char === '{') {
+        if (depth === 0) {
+          start = index;
+        }
+        depth += 1;
+        continue;
+      }
+
+      if (char === '}' && depth > 0) {
+        depth -= 1;
+        if (depth === 0 && start !== -1) {
+          return text.slice(start, index + 1);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private normalizeLikelyJson(text: string): string {
+    const apostropheNormalized = text.replace(/[\u2018\u2019]/g, "'");
+    let normalized = '';
+    let inString = false;
+    let escaped = false;
+
+    for (let index = 0; index < apostropheNormalized.length; index += 1) {
+      const char = apostropheNormalized[index];
+
+      if (inString) {
+        if (escaped) {
+          normalized += char;
+          escaped = false;
+          continue;
+        }
+
+        if (char === '\\') {
+          normalized += char;
+          escaped = true;
+          continue;
+        }
+
+        if (char === '"') {
+          normalized += char;
+          inString = false;
+          continue;
+        }
+
+        if (char === '“' || char === '”') {
+          const nextChar = this.nextMeaningfulChar(apostropheNormalized, index + 1);
+          if (!nextChar || nextChar === ',' || nextChar === ']' || nextChar === '}' || nextChar === ':') {
+            normalized += '"';
+            inString = false;
+          } else {
+            normalized += '\\"';
+          }
+          continue;
+        }
+
+        normalized += char;
+        continue;
+      }
+
+      if (char === '"') {
+        normalized += char;
+        inString = true;
+        continue;
+      }
+
+      if (char === '“' || char === '”') {
+        normalized += '"';
+        inString = true;
+        continue;
+      }
+
+      normalized += char;
+    }
+
+    return normalized;
+  }
+
+  private nextMeaningfulChar(text: string, startIndex: number): string | null {
+    for (let index = startIndex; index < text.length; index += 1) {
+      const char = text[index];
+      if (!/\s/.test(char)) {
+        return char;
+      }
+    }
+
+    return null;
+  }
+
+  private looksLikeAnalysisObject(value: unknown): value is Record<string, unknown> {
+    return !!value && typeof value === 'object' && !Array.isArray(value) && (
+      'conversation_health' in value ||
+      'attraction_score' in value ||
+      'ghosting_risk' in value ||
+      'reply_suggestions' in value
+    );
+  }
+
   private normalizeScore(value: unknown): number {
     const score = Number(value);
     if (!Number.isFinite(score)) {
@@ -162,6 +359,13 @@ export class ApiService {
   }
 
   private normalizeStringList(value: unknown): string[] {
+    if (typeof value === 'string') {
+      return value
+        .split(/\n+/)
+        .map((item) => item.replace(/^[-*•\s]+/, '').trim())
+        .filter((item) => item.length > 0);
+    }
+
     if (!Array.isArray(value)) {
       return [];
     }
