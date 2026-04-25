@@ -1,6 +1,6 @@
 :host { display: block; }
 
-.reply-card { border-radius: 16px !important; }
+.reply-card { border-radius: var(--ds-radius-md) !important; }
 
 .reply-list {
   display: flex;
@@ -13,16 +13,25 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 14px 16px;
+  background: var(--ds-surface-muted);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-sm);
+  padding: 16px 18px;
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
+}
+
+.reply-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(168, 85, 247, 0.25);
+  box-shadow: var(--ds-shadow-sm);
 }
 
 .reply-body {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
+  min-width: 0;
 }
 
 .reply-num {
@@ -30,7 +39,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: var(--ds-gradient-brand);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -38,28 +47,33 @@
   align-items: center;
   justify-content: center;
   margin-top: 2px;
+  box-shadow: 0 6px 14px -6px rgba(139, 92, 246, 0.5);
 }
 
 .reply-text {
-  font-size: 14px;
-  color: #374151;
-  line-height: 1.6;
+  font-size: 14.5px;
+  color: var(--ds-text);
+  line-height: 1.65;
   margin: 0;
   padding-top: 3px;
+  font-weight: 500;
 }
 
 .copy-btn {
   flex-shrink: 0;
   font-size: 12px !important;
-  border-radius: 8px !important;
-  color: #c026d3 !important;
-  border-color: #e9d5ff !important;
+  border-radius: 999px !important;
+  color: var(--ds-violet) !important;
+  border-color: rgba(139, 92, 246, 0.25) !important;
+  font-weight: 600 !important;
+  transition: background var(--ds-transition), border-color var(--ds-transition), color var(--ds-transition);
 }
 .copy-btn:hover {
-  background: #faf5ff !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.45) !important;
 }
 .copy-btn.copied {
-  color: #059669 !important;
-  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
   background: #ecfdf5 !important;
 }

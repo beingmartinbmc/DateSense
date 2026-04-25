@@ -270,74 +270,103 @@ export class ApiService {
 
   private normalizeLikelyJson(text: string): string {
     const apostropheNormalized = text.replace(/[\u2018\u2019]/g, "'");
-    let normalized = '';
-    let inString = false;
-    let escaped = false;
-
-    for (let index = 0; index < apostropheNormalized.length; index += 1) {
-      const char = apostropheNormalized[index];
-
-      if (inString) {
-        if (escaped) {
-          normalized += char;
-          escaped = false;
-          continue;
-        }
-
-        if (char === '\\') {
-          normalized += char;
-          escaped = true;
-          continue;
-        }
-
-        if (char === '"') {
-          normalized += char;
-          inString = false;
-          continue;
-        }
-
-        if (char === '“' || char === '”') {
-          const nextChar = this.nextMeaningfulChar(apostropheNormalized, index + 1);
-          if (!nextChar || nextChar === ',' || nextChar === ']' || nextChar === '}' || nextChar === ':') {
-            normalized += '"';
-            inString = false;
-          } else {
-            normalized += '\\"';
-          }
-          continue;
-        }
-
-        normalized += char;
-        continue;
-      }
-
-      if (char === '"') {
-        normalized += char;
-        inString = true;
-        continue;
-      }
-
-      if (char === '“' || char === '”') {
-        normalized += '"';
-        inString = true;
-        continue;
-      }
-
-      normalized += char;
-    }
-
-    return normalized;
+    const quoteRewritten = this.rewriteCurlyStrings(apostropheNormalized);
+    return this.insertMissingArrayCommas(quoteRewritten);
   }
 
-  private nextMeaningfulChar(text: string, startIndex: number): string | null {
-    for (let index = startIndex; index < text.length; index += 1) {
-      const char = text[index];
-      if (!/\s/.test(char)) {
-        return char;
+  private rewriteCurlyStrings(text: string): string {
+    let out = '';
+    let i = 0;
+    const len = text.length;
+
+    while (i < len) {
+      const ch = text[i];
+
+      if (ch === '"') {
+        const start = i;
+        i += 1;
+        while (i < len) {
+          const c = text[i];
+          if (c === '\\') {
+            i += 2;
+            continue;
+          }
+          if (c === '"') {
+            i += 1;
+            break;
+          }
+          i += 1;
+        }
+        out += text.slice(start, i);
+        continue;
       }
+
+      if (ch === '\u201C') {
+        i += 1;
+        let content = '';
+        while (i < len && text[i] !== '\u201D') {
+          const c = text[i];
+          if (c === '\\' || c === '"') {
+            content += '\\' + c;
+          } else {
+            content += c;
+          }
+          i += 1;
+        }
+        if (i < len) {
+          i += 1;
+        }
+        out += '"' + content + '"';
+        continue;
+      }
+
+      out += ch;
+      i += 1;
     }
 
-    return null;
+    return out;
+  }
+
+  private insertMissingArrayCommas(text: string): string {
+    let out = '';
+    let i = 0;
+    const len = text.length;
+
+    while (i < len) {
+      const ch = text[i];
+
+      if (ch === '"') {
+        const start = i;
+        i += 1;
+        while (i < len) {
+          const c = text[i];
+          if (c === '\\') {
+            i += 2;
+            continue;
+          }
+          if (c === '"') {
+            i += 1;
+            break;
+          }
+          i += 1;
+        }
+        out += text.slice(start, i);
+
+        let j = i;
+        while (j < len && /\s/.test(text[j])) {
+          j += 1;
+        }
+        if (j < len && text[j] === '"') {
+          out += ',';
+        }
+        continue;
+      }
+
+      out += ch;
+      i += 1;
+    }
+
+    return out;
   }
 
   private looksLikeAnalysisObject(value: unknown): value is Record<string, unknown> {

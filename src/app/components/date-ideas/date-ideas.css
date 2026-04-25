@@ -1,39 +1,60 @@
 :host { display: block; }
 
-.ideas-card { border-radius: 16px !important; }
+.ideas-card { border-radius: var(--ds-radius-md) !important; }
 
 .ideas-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
-@media (max-width: 600px) {
-  .ideas-grid { grid-template-columns: 1fr; }
+.idea-item {
+  position: relative;
+  background: linear-gradient(155deg, #fdf2f8 0%, #ede9fe 60%, #e0e7ff 100%);
+  border-radius: var(--ds-radius-md);
+  padding: 26px 20px;
+  text-align: center;
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
+  overflow: hidden;
 }
 
-.idea-item {
-  background: linear-gradient(135deg, #fdf2f8, #f5f3ff);
-  border-radius: 12px;
-  padding: 20px 16px;
-  text-align: center;
-  border: 1px solid #f3e8ff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.idea-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.6), transparent 60%);
+  pointer-events: none;
 }
+
 .idea-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .idea-emoji {
-  font-size: 32px;
-  display: block;
-  margin-bottom: 10px;
+  position: relative;
+  font-size: 34px;
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px -8px rgba(168, 85, 247, 0.45);
 }
 
 .idea-text {
-  font-size: 13px;
+  position: relative;
+  font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--ds-text);
   margin: 0;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
 }
