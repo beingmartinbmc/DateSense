@@ -1,11 +1,15 @@
 :host { display: block; }
 
-.manual-card { border-radius: 16px !important; }
+.manual-card { border-radius: var(--ds-radius-md) !important; }
+
+.manual-card mat-card-content {
+  padding: 28px !important;
+}
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
+  gap: 0 18px;
 }
 
 @media (max-width: 600px) {
@@ -15,12 +19,15 @@
 .full-width { width: 100%; }
 
 .optional-label {
-  font-weight: 400;
+  font-weight: 500;
   text-transform: none;
   letter-spacing: normal;
-  color: #9ca3af;
+  color: var(--ds-text-soft);
+  font-size: 12px;
+  margin-left: 6px;
 }
 
 .required-star {
-  color: #ec4899;
+  color: var(--ds-pink);
+  margin-left: 4px;
 }

@@ -16,9 +16,17 @@ html {
 
 body {
   color-scheme: light;
-  background: linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 50%, #eff6ff 100%);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  background:
+    radial-gradient(circle at 12% -10%, rgba(236, 72, 153, 0.18), transparent 55%),
+    radial-gradient(circle at 95% 10%, rgba(139, 92, 246, 0.18), transparent 55%),
+    radial-gradient(circle at 50% 110%, rgba(14, 165, 233, 0.12), transparent 60%),
+    linear-gradient(180deg, #fdf4ff 0%, #f8fafc 60%, #eef2ff 100%);
+  background-attachment: fixed;
+  color: #0f172a;
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   margin: 0;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

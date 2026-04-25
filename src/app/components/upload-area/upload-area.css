@@ -1,77 +1,88 @@
 :host { display: block; }
 
 .upload-zone {
-  border: 2px dashed #d1d5db;
-  border-radius: 16px;
+  border: 2px dashed rgba(168, 85, 247, 0.32);
+  border-radius: var(--ds-radius-md);
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: rgba(255,255,255,0.7);
+  transition: transform var(--ds-transition), background var(--ds-transition), border-color var(--ds-transition), box-shadow var(--ds-transition);
+  background: var(--ds-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
+
 .upload-zone:hover {
-  border-color: #c084fc;
-  background: rgba(192, 132, 252, 0.04);
+  border-color: rgba(168, 85, 247, 0.6);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-1px);
 }
+
 .upload-zone.dragging {
-  border-color: #ec4899;
+  border-color: var(--ds-pink);
   background: rgba(236, 72, 153, 0.06);
   transform: scale(1.01);
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .upload-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 24px !important;
+  padding: 56px 24px !important;
   text-align: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .upload-icon-circle {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fce7f3, #ede9fe);
+  background: var(--ds-gradient-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  box-shadow: 0 12px 28px -16px rgba(168, 85, 247, 0.5);
 }
 
 .upload-icon {
   font-size: 36px;
   width: 36px;
   height: 36px;
-  color: #c026d3;
+  color: var(--ds-violet);
 }
 
 .upload-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #374151;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ds-text);
   margin: 0;
+  letter-spacing: -0.005em;
 }
 
 .upload-subtitle {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--ds-text-soft);
   margin: 0;
+  font-weight: 500;
 }
 
 .error-card {
-  margin-top: 16px;
-  background: #fef2f2 !important;
+  margin-top: 18px;
+  background: rgba(254, 226, 226, 0.55) !important;
   border: 1px solid #fecaca !important;
-  border-radius: 12px !important;
+  border-radius: var(--ds-radius-sm) !important;
 }
 
 .error-text {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  color: #dc2626;
+  gap: 8px;
+  color: #b91c1c;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
 }
 

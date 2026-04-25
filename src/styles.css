@@ -1,62 +1,128 @@
-/* Global app styles — all layout via Angular Material + plain CSS */
+/* DateSense — global design tokens and shared utilities */
+
+:root {
+  /* Brand palette */
+  --ds-pink: #ec4899;
+  --ds-pink-soft: #f472b6;
+  --ds-violet: #8b5cf6;
+  --ds-violet-soft: #a78bfa;
+  --ds-rose: #f43f5e;
+  --ds-amber: #f59e0b;
+  --ds-emerald: #10b981;
+  --ds-sky: #0ea5e9;
+
+  /* Surfaces */
+  --ds-surface: rgba(255, 255, 255, 0.78);
+  --ds-surface-strong: rgba(255, 255, 255, 0.92);
+  --ds-surface-muted: #f8fafc;
+  --ds-border: rgba(15, 23, 42, 0.08);
+  --ds-border-strong: rgba(15, 23, 42, 0.14);
+
+  /* Text */
+  --ds-text: #0f172a;
+  --ds-text-muted: #475569;
+  --ds-text-soft: #94a3b8;
+
+  /* Effects */
+  --ds-radius-sm: 12px;
+  --ds-radius-md: 18px;
+  --ds-radius-lg: 24px;
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --ds-shadow-md: 0 12px 32px -16px rgba(15, 23, 42, 0.16),
+                  0 4px 12px -8px rgba(15, 23, 42, 0.06);
+  --ds-shadow-lg: 0 28px 60px -28px rgba(139, 92, 246, 0.35),
+                  0 12px 30px -16px rgba(236, 72, 153, 0.18);
+  --ds-transition: 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --ds-gradient-brand: linear-gradient(135deg, #ec4899 0%, #a855f7 60%, #6366f1 100%);
+  --ds-gradient-soft: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 60%, #e0e7ff 100%);
+}
 
 .page-container {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 .page-container-wide {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: var(--ds-gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: inline-block;
   padding-bottom: 4px;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ds-text-soft);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 16px;
+  letter-spacing: 0.14em;
+  margin: 0 0 14px;
+}
+
+/* Glass card utility used across pages */
+.ds-glass {
+  background: var(--ds-surface);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-md);
 }
 
 .analyze-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  background: var(--ds-gradient-brand) !important;
   color: #fff !important;
   font-weight: 600 !important;
-  letter-spacing: 0.04em;
-  padding: 0 32px !important;
-  height: 48px !important;
-  font-size: 14px !important;
-  border-radius: 24px !important;
+  letter-spacing: 0.02em;
+  padding: 0 36px !important;
+  height: 52px !important;
+  font-size: 15px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 16px 30px -14px rgba(139, 92, 246, 0.55);
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition);
 }
 
 .analyze-btn:hover {
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 20px 36px -14px rgba(139, 92, 246, 0.6);
+}
+
+.analyze-btn:active {
+  transform: translateY(0);
+}
+
+/* Material card global polish */
+.mat-mdc-card.mat-mdc-card-outlined {
+  border-color: var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--ds-radius-md) !important;
+  box-shadow: var(--ds-shadow-md) !important;
 }
 
 .score-bar-track {
   height: 8px;
-  border-radius: 4px;
-  background: #f1f5f9;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
   overflow: hidden;
   margin-top: 12px;
 }
 
 .score-bar-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: 999px;
   transition: width 1s ease-out;
 }
 
