@@ -20,7 +20,7 @@ AI-powered dating conversation analyzer. Upload a chat screenshot or paste your 
 - Angular 21 (standalone components, signals)
 - Angular Material (Material 3 theming)
 - TypeScript 5.9
-- OpenAI Vision API (via backend proxy)
+- OpenAI Vision API (via Railway `ai-gateway` backend proxy)
 
 ## Development
 

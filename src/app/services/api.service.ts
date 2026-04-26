@@ -39,12 +39,41 @@ export interface ManualInputData {
   additionalContext?: string;
 }
 
+type OpenAiMessageContent =
+  | string
+  | Array<
+      | { type: 'text'; text: string }
+      | { type: 'image_url'; image_url: { url: string } }
+    >;
+
+interface OpenAiProxyMessage {
+  role: 'system' | 'user';
+  content: OpenAiMessageContent;
+}
+
+interface OpenAiProxyRequest {
+  messages: OpenAiProxyMessage[];
+  maxTokens: number;
+  temperature: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private readonly apiUrl =
-    'https://epic-backend-f9tfcyn1d-beingmartinbmcs-projects.vercel.app/api/generic-vision';
+    'https://ai-gateway-production-0388.up.railway.app/api/v1/openai-proxy';
+
+  private readonly proxyOptions = {
+    maxTokens: 2200,
+    temperature: 0.2,
+    topP: 0.9,
+    frequencyPenalty: 0,
+    presencePenalty: 0,
+  };
 
   constructor(private http: HttpClient) {}
 
@@ -52,12 +81,11 @@ export class ApiService {
     return new Observable<AnalysisResponse>((subscriber) => {
       const promises = files.map(
         (file) =>
-          new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+          new Promise<{ dataUrl: string }>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
               resolve({
-                base64: (reader.result as string).split(',')[1],
-                mimeType: file.type || 'image/png',
+                dataUrl: reader.result as string,
               });
             };
             reader.onerror = () => reject(new Error('Failed to read file'));
@@ -67,11 +95,19 @@ export class ApiService {
 
       Promise.all(promises)
         .then((images) => {
-          const body = {
-            prompt: buildScreenshotPrompt(),
-            context: DATESENSE_SYSTEM_CONTEXT,
-            images,
-          };
+          const body = this.buildProxyRequest([
+            { role: 'system', content: DATESENSE_SYSTEM_CONTEXT },
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: buildScreenshotPrompt() },
+                ...images.map((image) => ({
+                  type: 'image_url' as const,
+                  image_url: { url: image.dataUrl },
+                })),
+              ],
+            },
+          ]);
 
           this.http
             .post<any>(this.apiUrl, body)
@@ -86,25 +122,34 @@ export class ApiService {
   }
 
   analyzeManual(data: ManualInputData): Observable<AnalysisResponse> {
-    const body = {
-      prompt: buildManualPrompt({
-        yourName: data.yourName,
-        theirName: data.theirName,
-        yourAge: data.yourAge,
-        theirAge: data.theirAge,
-        platform: data.platform,
-        chatDuration: data.chatDuration,
-        chatMessages: data.chatMessages,
-        yourBio: data.yourBio,
-        theirBio: data.theirBio,
-        additionalContext: data.additionalContext,
-      }),
-      context: DATESENSE_SYSTEM_CONTEXT,
-    };
+    const prompt = buildManualPrompt({
+      yourName: data.yourName,
+      theirName: data.theirName,
+      yourAge: data.yourAge,
+      theirAge: data.theirAge,
+      platform: data.platform,
+      chatDuration: data.chatDuration,
+      chatMessages: data.chatMessages,
+      yourBio: data.yourBio,
+      theirBio: data.theirBio,
+      additionalContext: data.additionalContext,
+    });
+
+    const body = this.buildProxyRequest([
+      { role: 'system', content: DATESENSE_SYSTEM_CONTEXT },
+      { role: 'user', content: prompt },
+    ]);
 
     return this.http
       .post<any>(this.apiUrl, body)
       .pipe(map((res) => this.parseResponse(res)));
+  }
+
+  private buildProxyRequest(messages: OpenAiProxyMessage[]): OpenAiProxyRequest {
+    return {
+      messages,
+      ...this.proxyOptions,
+    };
   }
 
   private parseResponse(raw: any): AnalysisResponse {
