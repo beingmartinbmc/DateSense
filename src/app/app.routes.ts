@@ -5,5 +5,6 @@ import { Dashboard } from './pages/dashboard/dashboard';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'dashboard', component: Dashboard },
+  { path: 'r/:token', component: Dashboard },
   { path: '**', redirectTo: '' },
 ];

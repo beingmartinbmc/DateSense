@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,6 +11,7 @@ import { UploadArea } from '../../components/upload-area/upload-area';
 import { ImagePreview } from '../../components/image-preview/image-preview';
 import { ManualInput, ManualInputData } from '../../components/manual-input/manual-input';
 import { ApiService, AnalysisResponse, ManualInputData as ManualInputPayload } from '../../services/api.service';
+import { SAMPLE_CHAT } from '../../sample-chat';
 
 export type InputMode = 'screenshot' | 'manual';
 
@@ -26,13 +27,18 @@ export interface FilePreview {
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, OnDestroy {
   activeTab = signal<InputMode>('screenshot');
   filePreviews = signal<FilePreview[]>([]);
   manualData = signal<ManualInputData | null>(null);
   isLoading = signal(false);
   loadingMessage = signal('');
   errorMessage = signal<string | null>(null);
+
+  /** Platform-aware keyboard hint for the paste tip. */
+  readonly pasteShortcut = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+    ? '⌘V'
+    : 'Ctrl+V';
 
   private readonly loadingMessages = [
     'Analyzing your conversation...',
@@ -82,6 +88,39 @@ export class Home implements OnInit {
       return list.filter((_, i) => i !== index);
     });
     this.errorMessage.set(null);
+  }
+
+  /** Run the analysis on a built-in demo conversation — zero friction for first-timers. */
+  tryDemo(): void {
+    this.errorMessage.set(null);
+    this.analyzeManual(SAMPLE_CHAT);
+  }
+
+  /** Allow pasting a screenshot straight from the clipboard (Cmd/Ctrl+V). */
+  @HostListener('document:paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    if (this.isLoading()) return;
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    const images: File[] = [];
+    for (const item of Array.from(items)) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) images.push(file);
+      }
+    }
+
+    if (images.length === 0) return;
+    event.preventDefault();
+    this.activeTab.set('screenshot');
+    this.onFilesSelected(images);
+  }
+
+  ngOnDestroy(): void {
+    for (const preview of this.filePreviews()) {
+      URL.revokeObjectURL(preview.url);
+    }
   }
 
   onManualSubmit(data: ManualInputData): void {
