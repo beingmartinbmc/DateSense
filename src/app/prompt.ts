@@ -185,7 +185,7 @@ Craft replies that sound like a REAL HUMAN wrote them, not a bot:
 - Every reply must connect to the actual conversation context instead of sounding interchangeable.
 - Every reply must feel like something a confident, socially aware adult would actually send.
 
-### 14. Date Ideas — Generate 2-3 UNIQUE ideas
+### 18. Date Ideas — Generate 2-3 UNIQUE ideas
 Suggest SPECIFIC, actionable date ideas DERIVED FROM the actual conversation:
 - Every idea MUST connect to something specifically mentioned in the chat — a hobby, interest, food preference, place, activity, vibe, or topic they discussed. NO generic ideas that ignore the conversation.
 - Each idea must be DISTINCT — no repeats or slight variations of the same activity.
@@ -212,7 +212,7 @@ const RESPONSE_FORMAT = `## MANDATORY Output Format
 
 Return ONLY a valid JSON object. NOTHING else. No markdown fences. No explanation. No preamble. No trailing text. If you output ANYTHING other than the raw JSON object, you have FAILED.
 
-EVERY key listed below (conversation_health, attraction_score, ghosting_risk, response_effort_balance, meetup_readiness, confidence_score, conversation_stage, momentum, insights, green_flags, red_flags, fake_golddigger_risk, fake_golddigger_reason, next_move, reply_suggestions, date_ideas) MUST live inside the SAME single top-level JSON object. There is exactly ONE opening { and ONE closing } in the entire output. Do NOT close the object early. Do NOT emit additional siblings outside the object. Do NOT split the response into multiple objects.
+EVERY key listed below (conversation_health, attraction_score, ghosting_risk, response_effort_balance, meetup_readiness, confidence_score, rizz_score, conversation_stage, momentum, archetype, brutal_verdict, rizz_roast, insights, green_flags, red_flags, fake_golddigger_risk, fake_golddigger_reason, next_move, reply_suggestions, date_ideas) MUST live inside the SAME single top-level JSON object. There is exactly ONE opening { and ONE closing } in the entire output. Do NOT close the object early. Do NOT emit additional siblings outside the object. Do NOT split the response into multiple objects.
 
 Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST use plain double quotes (") only. NEVER use curly quotes like “ ” or ‘ ’ anywhere in the JSON. Always include a comma between adjacent array elements.
 
@@ -223,8 +223,12 @@ Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST 
   "response_effort_balance": <number 0-100>,
   "meetup_readiness": <number 0-100>,
   "confidence_score": <number 0-100>,
+  "rizz_score": <number 0-100>,
   "conversation_stage": "<Opening | Building Rapport | Momentum Window | Stalling | Dead>",
   "momentum": "<Rising | Flat | Fading>",
+  "archetype": "<1-4 word memeable label for the match>",
+  "brutal_verdict": "<one punchy screenshot-worthy headline verdict>",
+  "rizz_roast": "<one funny honest roast of the user's own texting game>",
   "insights": [
     "<specific evidence-based insight>",
     "<specific evidence-based insight>",

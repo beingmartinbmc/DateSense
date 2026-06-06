@@ -14,8 +14,12 @@ export interface AnalysisResponse {
   response_effort_balance: number;
   meetup_readiness: number;
   confidence_score: number;
+  rizz_score: number;
   conversation_stage: ConversationStage;
   momentum: ConversationMomentum;
+  archetype: string;
+  brutal_verdict: string;
+  rizz_roast: string;
   insights: string[];
   green_flags: string[];
   red_flags: string[];
@@ -223,8 +227,12 @@ export class ApiService {
       response_effort_balance: this.normalizeScore(data.response_effort_balance),
       meetup_readiness: this.normalizeScore(data.meetup_readiness),
       confidence_score: this.normalizeScore(data.confidence_score),
+      rizz_score: this.normalizeScore(data.rizz_score),
       conversation_stage: this.normalizeStage(data.conversation_stage),
       momentum: this.normalizeMomentum(data.momentum),
+      archetype: this.normalizeText(data.archetype, 'Mixed Signals'),
+      brutal_verdict: this.normalizeText(data.brutal_verdict, 'Too little to go on — give it another exchange before reading the tea leaves.'),
+      rizz_roast: this.normalizeText(data.rizz_roast, 'Not enough to roast yet — send a few more messages and try again.'),
       insights: this.normalizeStringList(data.insights),
       green_flags: this.normalizeStringList(data.green_flags),
       red_flags: this.normalizeStringList(data.red_flags),
