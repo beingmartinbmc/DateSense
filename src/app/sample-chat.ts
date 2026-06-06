@@ -1,4 +1,4 @@
-import { ManualInputData } from './components/manual-input/manual-input';
+import { ManualInputData } from './services/api.service';
 
 /**
  * A built-in demo conversation so first-time visitors can experience the full
