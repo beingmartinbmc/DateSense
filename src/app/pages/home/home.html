@@ -7,7 +7,7 @@
       <span class="badge-text">AI-Powered Analysis</span>
     </div>
     <p class="subtitle">
-      Upload a chat screenshot or enter conversation details to analyze attraction, ghosting risk, and conversation health.
+      Upload a chat screenshot to analyze attraction, ghosting risk, and conversation health.
     </p>
     @if (!isLoading()) {
       <button mat-stroked-button class="demo-btn" (click)="tryDemo()">
@@ -27,58 +27,29 @@
         </mat-card-content>
       </mat-card>
     } @else {
-      <!-- Tab Toggle -->
-      <mat-tab-group class="input-tabs" animationDuration="200ms"
-        [selectedIndex]="activeTab() === 'screenshot' ? 0 : 1"
-        (selectedIndexChange)="switchTab($event === 0 ? 'screenshot' : 'manual')">
+      <div class="tab-body">
+        <app-upload-area (filesSelected)="onFilesSelected($event)" />
+        <p class="paste-hint"><mat-icon>content_paste</mat-icon> Tip: copy a screenshot and paste it here with {{ pasteShortcut }}</p>
 
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>add_photo_alternate</mat-icon>
-            <span class="tab-label-text">Screenshot</span>
-          </ng-template>
-
-          <div class="tab-body">
-            <app-upload-area (filesSelected)="onFilesSelected($event)" />
-            <p class="paste-hint"><mat-icon>content_paste</mat-icon> Tip: copy a screenshot and paste it here with {{ pasteShortcut }}</p>
-
-            @if (filePreviews().length > 0) {
-              <div class="preview-section">
-                <div class="preview-grid">
-                  @for (preview of filePreviews(); track $index) {
-                    <app-image-preview
-                      [imageUrl]="preview.url"
-                      [fileName]="preview.file.name"
-                      (removed)="removeFile($index)"
-                    />
-                  }
-                </div>
-                <div class="action-row">
-                  <button mat-flat-button class="analyze-btn" (click)="analyze()">
-                    Analyze {{ filePreviews().length === 1 ? 'Screenshot' : filePreviews().length + ' Screenshots' }}
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        </mat-tab>
-
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>edit_note</mat-icon>
-            <span class="tab-label-text">Manual Input</span>
-          </ng-template>
-
-          <div class="tab-body">
-            <app-manual-input #manualInput (submitted)="onManualSubmit($event)" />
+        @if (filePreviews().length > 0) {
+          <div class="preview-section">
+            <div class="preview-grid">
+              @for (preview of filePreviews(); track $index) {
+                <app-image-preview
+                  [imageUrl]="preview.url"
+                  [fileName]="preview.file.name"
+                  (removed)="removeFile($index)"
+                />
+              }
+            </div>
             <div class="action-row">
-              <button mat-flat-button class="analyze-btn" (click)="manualInput.onSubmit()">
-                Analyze Conversation
+              <button mat-flat-button class="analyze-btn" (click)="analyze()">
+                Analyze {{ filePreviews().length === 1 ? 'Screenshot' : filePreviews().length + ' Screenshots' }}
               </button>
             </div>
           </div>
-        </mat-tab>
-      </mat-tab-group>
+        }
+      </div>
 
       @if (errorMessage()) {
         <mat-card class="error-banner">
