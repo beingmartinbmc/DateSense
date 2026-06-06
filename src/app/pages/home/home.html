@@ -34,6 +34,7 @@
 
           <div class="tab-body">
             <app-upload-area (filesSelected)="onFilesSelected($event)" />
+            <p class="paste-hint"><mat-icon>content_paste</mat-icon> Tip: copy a screenshot and paste it here with {{ pasteShortcut }}</p>
 
             @if (filePreviews().length > 0) {
               <div class="preview-section">

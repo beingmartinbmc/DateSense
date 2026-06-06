@@ -1,0 +1,57 @@
+@if (result(); as r) {
+  <mat-card appearance="outlined" class="share-card">
+    <mat-card-content>
+      <h3 class="section-title">Your Shareable Verdict</h3>
+
+      <!-- Live preview that mirrors the generated image -->
+      <div class="verdict-preview">
+        <div class="vp-brand">DateSense</div>
+        <div class="vp-archetype">{{ r.archetype }}</div>
+        <p class="vp-verdict">"{{ r.brutal_verdict }}"</p>
+
+        <div class="vp-rings">
+          <div class="vp-ring">
+            <span class="vp-ring-value pink">{{ r.attraction_score }}</span>
+            <span class="vp-ring-label">Attraction</span>
+          </div>
+          <div class="vp-ring">
+            <span class="vp-ring-value emerald">{{ 100 - r.ghosting_risk }}</span>
+            <span class="vp-ring-label">Staying</span>
+          </div>
+          <div class="vp-ring">
+            <span class="vp-ring-value violet">{{ r.rizz_score }}</span>
+            <span class="vp-ring-label">Your Rizz</span>
+          </div>
+        </div>
+
+        @if (r.rizz_roast) {
+          <p class="vp-roast">"{{ r.rizz_roast }}"</p>
+        }
+      </div>
+
+      <p class="share-note">
+        <mat-icon>lock</mat-icon>
+        Your chat, names and screenshots are never included — only this verdict.
+      </p>
+
+      <div class="share-actions">
+        <button mat-flat-button class="share-btn primary" (click)="shareCard()" [disabled]="busy()">
+          <mat-icon>{{ busy() ? 'hourglass_top' : 'ios_share' }}</mat-icon>
+          {{ busy() ? 'Building…' : 'Share Verdict' }}
+        </button>
+        <button mat-stroked-button class="share-btn" (click)="downloadCard()" [disabled]="busy()">
+          <mat-icon>download</mat-icon>
+          Save Image
+        </button>
+        <button mat-stroked-button class="share-btn" (click)="copyLink()">
+          <mat-icon>{{ copied() ? 'check' : 'link' }}</mat-icon>
+          {{ copied() ? 'Copied!' : 'Copy Link' }}
+        </button>
+      </div>
+
+      @if (statusMessage()) {
+        <p class="share-status">{{ statusMessage() }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+}

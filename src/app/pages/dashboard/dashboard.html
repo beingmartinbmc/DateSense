@@ -3,18 +3,32 @@
     <!-- Header -->
     <div class="header">
       <h1 class="title gradient-text">DateSense</h1>
-      <p class="subtitle">Your conversation analysis results</p>
+      <p class="subtitle">
+        {{ isSharedView() ? 'A DateSense verdict was shared with you' : 'Your conversation analysis results' }}
+      </p>
     </div>
 
     <div class="page-container-wide content">
+      <!-- Brutal Verdict Hero -->
+      <div class="verdict-hero">
+        <span class="verdict-archetype">{{ r.archetype }}</span>
+        <h2 class="verdict-line">"{{ r.brutal_verdict }}"</h2>
+        @if (r.rizz_roast) {
+          <p class="verdict-roast"><mat-icon>local_fire_department</mat-icon> {{ r.rizz_roast }}</p>
+        }
+      </div>
+
+      <!-- Shareable card -->
+      <app-share-card [result]="r" />
+
       <!-- Score Cards -->
       <div class="scores-grid">
         <app-score-card label="Attraction Score" [score]="r.attraction_score" color="pink" />
+        <app-score-card label="Your Rizz Score" [score]="r.rizz_score" color="violet" />
         <app-score-card label="Ghosting Risk" [score]="r.ghosting_risk" color="amber" />
         <app-score-card label="Conversation Health" [score]="r.conversation_health" color="emerald" />
-        <app-score-card label="Effort Balance" [score]="r.response_effort_balance" color="violet" />
-        <app-score-card label="Meetup Readiness" [score]="r.meetup_readiness" color="sky" />
-        <app-score-card label="Analysis Confidence" [score]="r.confidence_score" color="rose" />
+        <app-score-card label="Effort Balance" [score]="r.response_effort_balance" color="sky" />
+        <app-score-card label="Meetup Readiness" [score]="r.meetup_readiness" color="rose" />
       </div>
 
       <div class="snapshot-grid">
@@ -47,19 +61,21 @@
       </div>
 
       <!-- Insights -->
-      <mat-card appearance="outlined" class="insights-card">
-        <mat-card-content>
-          <h3 class="section-title">Insights</h3>
-          <ul class="insights-list">
-            @for (insight of r.insights; track $index) {
-              <li class="insight-item">
-                <mat-icon class="insight-icon">check_circle</mat-icon>
-                <span>{{ insight }}</span>
-              </li>
-            }
-          </ul>
-        </mat-card-content>
-      </mat-card>
+      @if (!isSharedView()) {
+        <mat-card appearance="outlined" class="insights-card">
+          <mat-card-content>
+            <h3 class="section-title">Insights</h3>
+            <ul class="insights-list">
+              @for (insight of r.insights; track $index) {
+                <li class="insight-item">
+                  <mat-icon class="insight-icon">check_circle</mat-icon>
+                  <span>{{ insight }}</span>
+                </li>
+              }
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      }
 
       <!-- Fake / Golddigger Risk -->
       <mat-card appearance="outlined" class="risk-card" [class.risk-none]="r.fake_golddigger_risk === 'None'" [class.risk-low]="r.fake_golddigger_risk === 'Low'" [class.risk-medium]="r.fake_golddigger_risk === 'Medium'" [class.risk-high]="r.fake_golddigger_risk === 'High'">
@@ -112,13 +128,17 @@
       </div>
 
       <!-- Reply Suggestions -->
-      <app-reply-list [replies]="r.reply_suggestions" />
+      @if (!isSharedView() && r.reply_suggestions.length > 0) {
+        <app-reply-list [replies]="r.reply_suggestions" />
+      }
 
       <!-- Date Ideas -->
-      <app-date-ideas [ideas]="r.date_ideas" />
+      @if (!isSharedView() && r.date_ideas.length > 0) {
+        <app-date-ideas [ideas]="r.date_ideas" />
+      }
 
       <!-- Screenshot Previews -->
-      @if (imageUrls().length > 0) {
+      @if (!isSharedView() && imageUrls().length > 0) {
         <mat-card appearance="outlined" class="screenshot-card">
           <mat-card-content>
             <h3 class="section-title">Conversation Screenshots</h3>
@@ -133,13 +153,25 @@
         </mat-card>
       }
 
-      <!-- Back Button -->
-      <div class="back-row">
-        <button mat-stroked-button color="primary" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-          Analyze Another Screenshot
-        </button>
-      </div>
+      <!-- CTA / Back -->
+      @if (isSharedView()) {
+        <mat-card appearance="outlined" class="cta-card">
+          <mat-card-content class="cta-content">
+            <h3 class="cta-title">Curious about your own talking stage?</h3>
+            <p class="cta-text">Get a brutally honest read on attraction, ghosting risk and your rizz — in seconds.</p>
+            <button mat-flat-button class="analyze-btn" (click)="goBack()">
+              Analyze My Chat
+            </button>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="back-row">
+          <button mat-stroked-button color="primary" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Analyze Another Chat
+          </button>
+        </div>
+      }
     </div>
   }
 </div>
