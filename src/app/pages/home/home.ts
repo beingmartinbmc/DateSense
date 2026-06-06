@@ -2,18 +2,14 @@ import { Component, signal, OnInit, OnDestroy, HostListener } from '@angular/cor
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { UploadArea } from '../../components/upload-area/upload-area';
 import { ImagePreview } from '../../components/image-preview/image-preview';
-import { ManualInput, ManualInputData } from '../../components/manual-input/manual-input';
-import { ApiService, AnalysisResponse, ManualInputData as ManualInputPayload } from '../../services/api.service';
+import { ApiService, AnalysisResponse, ManualInputData } from '../../services/api.service';
 import { SAMPLE_CHAT } from '../../sample-chat';
-
-export type InputMode = 'screenshot' | 'manual';
 
 export interface FilePreview {
   file: File;
@@ -23,14 +19,12 @@ export interface FilePreview {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule, MatIconModule, UploadArea, ImagePreview, ManualInput],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule, MatIconModule, UploadArea, ImagePreview],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home implements OnInit, OnDestroy {
-  activeTab = signal<InputMode>('screenshot');
   filePreviews = signal<FilePreview[]>([]);
-  manualData = signal<ManualInputData | null>(null);
   isLoading = signal(false);
   loadingMessage = signal('');
   errorMessage = signal<string | null>(null);
@@ -59,11 +53,6 @@ export class Home implements OnInit, OnDestroy {
   private incrementFlagCounter(): void {
     const img = new Image();
     img.src = 'https://s01.flagcounter.com/count2/giRi/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/';
-  }
-
-  switchTab(tab: InputMode): void {
-    this.activeTab.set(tab);
-    this.errorMessage.set(null);
   }
 
   private readonly maxTotalFiles = 10;
@@ -113,7 +102,6 @@ export class Home implements OnInit, OnDestroy {
 
     if (images.length === 0) return;
     event.preventDefault();
-    this.activeTab.set('screenshot');
     this.onFilesSelected(images);
   }
 
@@ -121,11 +109,6 @@ export class Home implements OnInit, OnDestroy {
     for (const preview of this.filePreviews()) {
       URL.revokeObjectURL(preview.url);
     }
-  }
-
-  onManualSubmit(data: ManualInputData): void {
-    this.manualData.set(data);
-    this.analyzeManual(data);
   }
 
   analyze(): void {
