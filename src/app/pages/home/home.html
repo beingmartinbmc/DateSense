@@ -9,6 +9,12 @@
     <p class="subtitle">
       Upload a chat screenshot or enter conversation details to analyze attraction, ghosting risk, and conversation health.
     </p>
+    @if (!isLoading()) {
+      <button mat-stroked-button class="demo-btn" (click)="tryDemo()">
+        <mat-icon>auto_awesome</mat-icon>
+        Try it with a sample chat
+      </button>
+    }
   </div>
 
   <!-- Main Content -->
