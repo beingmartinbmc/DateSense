@@ -35,17 +35,9 @@
       </p>
 
       <div class="share-actions">
-        <button mat-flat-button class="share-btn primary" (click)="shareCard()" [disabled]="busy()">
-          <mat-icon>{{ busy() ? 'hourglass_top' : 'ios_share' }}</mat-icon>
-          {{ busy() ? 'Building…' : 'Share Verdict' }}
-        </button>
-        <button mat-stroked-button class="share-btn" (click)="downloadCard()" [disabled]="busy()">
-          <mat-icon>download</mat-icon>
-          Save Image
-        </button>
-        <button mat-stroked-button class="share-btn" (click)="copyLink()">
+        <button mat-flat-button class="share-btn primary" (click)="copyLink()">
           <mat-icon>{{ copied() ? 'check' : 'link' }}</mat-icon>
-          {{ copied() ? 'Copied!' : 'Copy Link' }}
+          {{ copied() ? 'Copied!' : 'Copy Share Link' }}
         </button>
       </div>
 
