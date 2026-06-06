@@ -75,35 +75,29 @@ export class ApiService {
     presencePenalty: 0,
   };
 
+  // Screenshots are sent as base64 data URLs inside the JSON body. Raw phone
+  // screenshots (PNG, multiple MB each) inflate ~37% under base64 and quickly
+  // blow past the gateway's request-size limit, surfacing as a generic server
+  // error. Downscaling + JPEG re-encoding keeps payloads small while staying
+  // legible for the vision model (which itself caps the long edge near ~2048px).
+  private readonly maxImageEdge = 2000;
+  private readonly imageQuality = 0.85;
+
   constructor(private http: HttpClient) {}
 
   analyzeScreenshots(files: File[]): Observable<AnalysisResponse> {
     return new Observable<AnalysisResponse>((subscriber) => {
-      const promises = files.map(
-        (file) =>
-          new Promise<{ dataUrl: string }>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              resolve({
-                dataUrl: reader.result as string,
-              });
-            };
-            reader.onerror = () => reject(new Error('Failed to read file'));
-            reader.readAsDataURL(file);
-          }),
-      );
-
-      Promise.all(promises)
-        .then((images) => {
+      Promise.all(files.map((file) => this.readImageAsDataUrl(file)))
+        .then((dataUrls) => {
           const body = this.buildProxyRequest([
             { role: 'system', content: DATESENSE_SYSTEM_CONTEXT },
             {
               role: 'user',
               content: [
                 { type: 'text', text: buildScreenshotPrompt() },
-                ...images.map((image) => ({
+                ...dataUrls.map((url) => ({
                   type: 'image_url' as const,
-                  image_url: { url: image.dataUrl },
+                  image_url: { url },
                 })),
               ],
             },
@@ -118,6 +112,72 @@ export class ApiService {
             });
         })
         .catch((e) => subscriber.error(e));
+    });
+  }
+
+  private async readImageAsDataUrl(file: File): Promise<string> {
+    try {
+      return await this.compressImage(file);
+    } catch {
+      return this.readRawDataUrl(file);
+    }
+  }
+
+  private readRawDataUrl(file: File): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  private compressImage(file: File): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      if (typeof document === 'undefined' || typeof URL.createObjectURL !== 'function') {
+        reject(new Error('Canvas compression unavailable'));
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        try {
+          const scale = Math.min(1, this.maxImageEdge / Math.max(img.width, img.height));
+          const targetWidth = Math.max(1, Math.round(img.width * scale));
+          const targetHeight = Math.max(1, Math.round(img.height * scale));
+
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Canvas context unavailable'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          const dataUrl = canvas.toDataURL('image/jpeg', this.imageQuality);
+          if (!dataUrl || dataUrl === 'data:,') {
+            reject(new Error('Image encoding failed'));
+            return;
+          }
+
+          resolve(dataUrl);
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error('Image compression failed'));
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = objectUrl;
     });
   }
 
