@@ -25,6 +25,7 @@ export function buildManualPrompt(data: {
   yourBio?: string;
   theirBio?: string;
   additionalContext?: string;
+  goal?: string;
 }): string {
   const parts: string[] = [PROMPT_CORE, ''];
 
@@ -36,6 +37,7 @@ export function buildManualPrompt(data: {
   if (data.theirAge) profileLines.push(`- Match's age: ${data.theirAge}`);
   if (data.platform) profileLines.push(`- Platform: ${data.platform}`);
   if (data.chatDuration) profileLines.push(`- Chatting for: ${data.chatDuration}`);
+  if (data.goal) profileLines.push(`- What the user wants out of this: ${data.goal}`);
 
   if (profileLines.length > 0) {
     parts.push('## Profile Context');
@@ -68,6 +70,76 @@ export function buildManualPrompt(data: {
   parts.push(INPUT_GUARDRAILS);
   parts.push('');
   parts.push(RESPONSE_FORMAT);
+
+  return parts.join('\n');
+}
+
+// ── Tone-based reply regeneration ─────────────────────────────────────────────
+
+const TONE_GUIDANCE: Record<string, string> = {
+  Balanced: 'natural, warm and confident — the safe default that fits most situations',
+  Playful: 'light, teasing and fun, with banter and a wink — never mean',
+  Flirty: 'clearly flirtatious and warm, building romantic/sexual tension while staying respectful',
+  Bold: 'confident and forward — make a move, suggest plans, raise the stakes a little',
+  Direct: 'clear and low-effort to misread — say the thing, ask the question, no waffling',
+  Genuine: 'sincere and a touch vulnerable, showing real interest without games',
+  Funny: 'genuinely funny — jokes, absurdity, callbacks; prioritize making them laugh',
+  Unhinged: 'chaotic, unexpected and meme-y for entertainment — still send-able, never offensive, creepy, or boundary-crossing',
+};
+
+/**
+ * Build a focused prompt that regenerates ONLY reply suggestions in a chosen
+ * tone, given the conversation context the user already provided. Returns a
+ * tiny JSON object so the existing parser ladder can read it.
+ */
+export function buildReplyTonePrompt(data: {
+  tone: string;
+  chatMessages?: string;
+  archetype?: string;
+  brutalVerdict?: string;
+  count?: number;
+}): string {
+  const tone = data.tone || 'Balanced';
+  const guidance = TONE_GUIDANCE[tone] ?? TONE_GUIDANCE['Balanced'];
+  const count = data.count ?? 5;
+
+  const parts: string[] = [
+    `You are DateSense, a ruthlessly honest dating conversation coach. Write ${count} reply options the USER could send next in this dating conversation.`,
+    '',
+    `TONE: ${tone} — ${guidance}.`,
+    '',
+    'Rules:',
+    '- Replies must be natural, sendable text messages (no quotes, no labels, no numbering).',
+    '- Match the flow of the conversation; reference real details from it where possible.',
+    '- Keep each reply concise (one to three sentences).',
+    '- NEVER suggest manipulative, coercive, dishonest, or boundary-crossing tactics.',
+    '- Vary the replies so the user has a genuine choice.',
+  ];
+
+  if (data.archetype || data.brutalVerdict) {
+    parts.push('');
+    parts.push('## Context from the prior analysis');
+    if (data.archetype) parts.push(`- Match archetype: ${data.archetype}`);
+    if (data.brutalVerdict) parts.push(`- Verdict: ${data.brutalVerdict}`);
+  }
+
+  if (data.chatMessages && data.chatMessages.trim().length > 0) {
+    parts.push('');
+    parts.push('## Conversation');
+    parts.push('"""');
+    parts.push(data.chatMessages.trim());
+    parts.push('"""');
+  }
+
+  parts.push('');
+  parts.push(INPUT_GUARDRAILS);
+  parts.push('');
+  parts.push(
+    `## Output Format\nReturn ONLY a valid JSON object, nothing else, in exactly this shape:\n{\n  "reply_suggestions": [\n${Array.from(
+      { length: count },
+      (_unused, i) => `    "<reply ${i + 1}>"`,
+    ).join(',\n')}\n  ]\n}`,
+  );
 
   return parts.join('\n');
 }

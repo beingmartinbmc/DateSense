@@ -129,7 +129,10 @@
 
       <!-- Reply Suggestions -->
       @if (!isSharedView() && r.reply_suggestions.length > 0) {
-        <app-reply-list [replies]="r.reply_suggestions" />
+        <app-reply-list
+          [replies]="r.reply_suggestions"
+          [archetype]="r.archetype"
+          [brutalVerdict]="r.brutal_verdict" />
       }
 
       <!-- Date Ideas -->
