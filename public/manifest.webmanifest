@@ -1,0 +1,20 @@
+{
+  "name": "DateSense — Dating Chat Analysis",
+  "short_name": "DateSense",
+  "description": "Brutally honest AI analysis of your dating app conversations.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ec4899",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

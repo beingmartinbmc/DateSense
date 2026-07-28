@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  Source for public/og-image.png (the link-preview card). Edit here, then
+  regenerate at exactly 1200x630 from the repo root:
+
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
+    --window-size=1200,630 --screenshot="$PWD/public/og-image.png" \
+    "file://$PWD/scripts/og-image.html"
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        width: 1200px;
+        height: 630px;
+        font-family: Inter, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 60%, #e0e7ff 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 88px;
+        position: relative;
+        overflow: hidden;
+      }
+      .glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+      }
+      .glow-a { width: 460px; height: 460px; background: rgba(236,72,153,0.35); top: -160px; right: -80px; }
+      .glow-b { width: 400px; height: 400px; background: rgba(139,92,246,0.30); bottom: -180px; left: -100px; }
+      .inner { position: relative; z-index: 1; }
+      .brand {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ec4899 0%, #a855f7 60%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 30px;
+      }
+      h1 {
+        font-size: 74px;
+        font-weight: 800;
+        line-height: 1.06;
+        letter-spacing: -0.035em;
+        color: #0f172a;
+        max-width: 940px;
+      }
+      p {
+        margin-top: 26px;
+        font-size: 27px;
+        font-weight: 500;
+        color: #475569;
+        letter-spacing: -0.01em;
+      }
+      .metrics { display: flex; gap: 16px; margin-top: 48px; }
+      .pill {
+        padding: 13px 26px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.85);
+        border: 1px solid rgba(15,23,42,0.08);
+        font-size: 21px;
+        font-weight: 700;
+        color: #0f172a;
+        box-shadow: 0 10px 26px -18px rgba(15,23,42,0.4);
+      }
+      .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 11px; vertical-align: 1px; }
+    </style>
+  </head>
+  <body>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div class="inner">
+      <div class="brand">DateSense</div>
+      <h1>Are they into you,<br />or just being polite?</h1>
+      <p>Brutally honest AI analysis of your dating app chats.</p>
+      <div class="metrics">
+        <div class="pill"><span class="dot" style="background:#ec4899"></span>Attraction Score</div>
+        <div class="pill"><span class="dot" style="background:#f59e0b"></span>Ghosting Risk</div>
+        <div class="pill"><span class="dot" style="background:#8b5cf6"></span>Rizz Score</div>
+      </div>
+    </div>
+  </body>
+</html>
