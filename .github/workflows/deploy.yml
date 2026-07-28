@@ -8,20 +8,15 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  # Never cancel an in-flight production deploy — queued runs simply wait.
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -35,6 +30,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Run tests
+      run: npm test
+
     - name: Build application
       run: npx ng build --base-href /DateSense/
 
@@ -43,13 +41,27 @@ jobs:
         touch dist/DateSense/browser/.nojekyll
         cp dist/DateSense/browser/index.html dist/DateSense/browser/404.html
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-
     - name: Upload artifact
+      if: github.event_name == 'push'
       uses: actions/upload-pages-artifact@v3
       with:
         path: './dist/DateSense/browser'
+
+  # Only pushes to main reach production. A pull request builds and tests, but
+  # must never publish its branch to the live site.
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
 
     - name: Deploy to GitHub Pages
       id: deployment
