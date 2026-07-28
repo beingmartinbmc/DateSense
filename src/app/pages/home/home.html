@@ -46,6 +46,11 @@
               <button mat-flat-button class="analyze-btn" (click)="analyze()">
                 Analyze {{ filePreviews().length === 1 ? 'Screenshot' : filePreviews().length + ' Screenshots' }}
               </button>
+              @if (quotaRemaining() <= 10) {
+                <p class="quota-hint">
+                  {{ quotaRemaining() }} free {{ quotaRemaining() === 1 ? 'analysis' : 'analyses' }} left today
+                </p>
+              }
             </div>
           </div>
         }

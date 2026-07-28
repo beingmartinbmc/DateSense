@@ -257,7 +257,7 @@ Craft replies that sound like a REAL HUMAN wrote them, not a bot:
 - Every reply must connect to the actual conversation context instead of sounding interchangeable.
 - Every reply must feel like something a confident, socially aware adult would actually send.
 
-### 18. Date Ideas — Generate 2-3 UNIQUE ideas
+### 14. Date Ideas — Generate 2-3 UNIQUE ideas
 Suggest SPECIFIC, actionable date ideas DERIVED FROM the actual conversation:
 - Every idea MUST connect to something specifically mentioned in the chat — a hobby, interest, food preference, place, activity, vibe, or topic they discussed. NO generic ideas that ignore the conversation.
 - Each idea must be DISTINCT — no repeats or slight variations of the same activity.
@@ -265,6 +265,36 @@ Suggest SPECIFIC, actionable date ideas DERIVED FROM the actual conversation:
 - Keep it LOW-PRESSURE for early conversations — no "romantic dinner for two" on match day 1 unless that energy is already there.
 - Be specific enough to actually use: "Grab matcha at a cute cafe and people-watch" NOT "Maybe get coffee sometime."
 - Never include moralizing framing or unsolicited safety/emotional disclaimers.
+
+### 15. Rizz Score (0-100)
+Score the USER's own texting game — this is about THEM, not the match. It is the mirror of attraction_score, so the two must be able to disagree (a great texter can get a cold match, and a lucky one can coast on someone else's interest):
+- 90-100: effortless — teasing, callbacks, strong hooks, escalates at the right moment
+- 70-89: solid — asks good questions, gives the match something to work with, reads the room
+- 50-69: passable — carries a conversation but leans on safe, forgettable lines
+- 30-49: weak — interview-mode questions, one-word replies, misses obvious openings
+- 0-29: actively losing the plot — dead-end replies, ignored hooks, or trying way too hard
+Judge only what the USER actually sent. Do NOT let a warm, enthusiastic match inflate this score.
+
+### 16. Archetype
+A short, memeable label for the MATCH's behaviour pattern — this is the line people screenshot, so it has to land:
+- 2-4 words, title case, a noun phrase: "Slow-Fade Specialist", "Enthusiastic Overthinker", "Weekend Ghost"
+- Describe the PATTERN, never the person's looks, job, ethnicity, or worth
+- Must be earned by evidence in the chat — no generic filler like "Nice Person" or "Average Match"
+- Punchy and a little funny, never cruel or demeaning
+
+### 17. Brutal Verdict & Rizz Roast
+Two separate one-liners. Both are the headline of a shareable card, so length discipline matters:
+- brutal_verdict: the single most honest sentence about where this conversation stands, under 100 characters. Verdict on the SITUATION. Example: "She's polite, not interested — you're the one keeping this alive."
+- rizz_roast: one funny, self-deprecating-but-fair jab at the USER's texting, under 100 characters. Roast the TEXTING, never the person. Example: "Four questions in a row is an interrogation, not a conversation."
+- Never reuse the same sentence for both, and never pad either to fill space.
+
+### 18. Conversation Digest
+Reconstruct the conversation you actually read as a compact plain-text transcript:
+- Format each line as "You: ..." or "Them: ..." in chronological order
+- Condense long messages to their substance but KEEP the concrete details — names of places, hobbies, jokes, plans, and anything referenced later
+- Cap it at roughly 1200 characters; if the chat is longer, keep the opening exchange and the most recent messages and drop the least informative middle
+- This is used to rewrite replies in a different tone later, so detail lost here becomes a generic reply. It is never shown to the user.
+- If you genuinely could not read any messages, return an empty string.
 
 ## Behavioral Directives
 
@@ -284,7 +314,7 @@ const RESPONSE_FORMAT = `## MANDATORY Output Format
 
 Return ONLY a valid JSON object. NOTHING else. No markdown fences. No explanation. No preamble. No trailing text. If you output ANYTHING other than the raw JSON object, you have FAILED.
 
-EVERY key listed below (conversation_health, attraction_score, ghosting_risk, response_effort_balance, meetup_readiness, confidence_score, rizz_score, conversation_stage, momentum, archetype, brutal_verdict, rizz_roast, insights, green_flags, red_flags, fake_golddigger_risk, fake_golddigger_reason, next_move, reply_suggestions, date_ideas) MUST live inside the SAME single top-level JSON object. There is exactly ONE opening { and ONE closing } in the entire output. Do NOT close the object early. Do NOT emit additional siblings outside the object. Do NOT split the response into multiple objects.
+EVERY key listed below (conversation_health, attraction_score, ghosting_risk, response_effort_balance, meetup_readiness, confidence_score, rizz_score, conversation_stage, momentum, archetype, brutal_verdict, rizz_roast, insights, green_flags, red_flags, fake_golddigger_risk, fake_golddigger_reason, next_move, reply_suggestions, date_ideas, conversation_digest) MUST live inside the SAME single top-level JSON object. There is exactly ONE opening { and ONE closing } in the entire output. Do NOT close the object early. Do NOT emit additional siblings outside the object. Do NOT split the response into multiple objects.
 
 Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST use plain double quotes (") only. NEVER use curly quotes like “ ” or ‘ ’ anywhere in the JSON. Always include a comma between adjacent array elements.
 
@@ -325,5 +355,6 @@ Use ONLY standard ASCII JSON punctuation. Every key and every string value MUST 
   "date_ideas": [
     "<specific actionable date idea>",
     "<specific actionable date idea>"
-  ]
+  ],
+  "conversation_digest": "<compact You:/Them: transcript, max ~1200 chars>"
 }`;

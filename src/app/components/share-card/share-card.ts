@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AnalysisResponse } from '../../services/api.service';
 import { ResultStore } from '../../services/result-store.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-share-card',
@@ -17,6 +18,7 @@ export class ShareCard {
   result = input.required<AnalysisResponse>();
 
   private store = inject(ResultStore);
+  private analytics = inject(AnalyticsService);
 
   copied = signal(false);
   statusMessage = signal<string | null>(null);
@@ -32,6 +34,7 @@ export class ShareCard {
     const url = this.buildShareUrl();
     try {
       await navigator.clipboard.writeText(url);
+      this.analytics.track('share_link_copied');
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 1800);
     } catch {

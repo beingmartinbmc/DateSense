@@ -30,6 +30,8 @@ export class Home implements OnInit, OnDestroy {
   isLoading = signal(false);
   loadingMessage = signal('');
   errorMessage = signal<string | null>(null);
+  /** Analyses left in today's soft quota, surfaced once it starts running out. */
+  quotaRemaining = signal(Number.POSITIVE_INFINITY);
 
   /** Platform-aware keyboard hint for the paste tip. */
   readonly pasteShortcut = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -51,9 +53,14 @@ export class Home implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.analytics.init();
     this.analytics.track('page_view', { page: 'home' });
+    this.refreshQuota();
     this.incrementFlagCounter();
+  }
+
+  private refreshQuota(): void {
+    const quota = this.usageGuard.getQuota();
+    this.quotaRemaining.set(Math.max(0, quota.limit - quota.used));
   }
 
   private incrementFlagCounter(): void {
@@ -75,6 +82,7 @@ export class Home implements OnInit, OnDestroy {
       url: URL.createObjectURL(file),
     }));
     this.filePreviews.update((existing) => [...existing, ...newPreviews]);
+    this.analytics.track('screenshots_uploaded', { count: files.length });
   }
 
   removeFile(index: number): void {
@@ -131,6 +139,7 @@ export class Home implements OnInit, OnDestroy {
       return;
     }
     this.usageGuard.recordAnalysis();
+    this.refreshQuota();
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -166,6 +175,7 @@ export class Home implements OnInit, OnDestroy {
       return;
     }
     this.usageGuard.recordAnalysis();
+    this.refreshQuota();
 
     this.isLoading.set(true);
     this.errorMessage.set(null);

@@ -10,6 +10,7 @@ import { DateIdeas } from '../../components/date-ideas/date-ideas';
 import { ShareCard } from '../../components/share-card/share-card';
 import { AnalysisResponse } from '../../services/api.service';
 import { ResultStore } from '../../services/result-store.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +28,7 @@ export class Dashboard implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(ResultStore);
+  private analytics = inject(AnalyticsService);
 
   ngOnInit(): void {
     // 1. Shared link: /r/:token — decode a verdict someone shared with us.
@@ -36,11 +38,17 @@ export class Dashboard implements OnInit {
       if (decoded) {
         this.result.set(decoded);
         this.isSharedView.set(true);
+        // Closes the viral loop: this is the only place we learn that a shared
+        // link actually brought someone in.
+        this.analytics.track('shared_link_opened');
+        this.analytics.track('page_view', { page: 'shared' });
         return;
       }
       this.router.navigate(['/']);
       return;
     }
+
+    this.analytics.track('page_view', { page: 'dashboard' });
 
     // 2. Fresh navigation state from an analysis run.
     const nav = this.router.getCurrentNavigation();

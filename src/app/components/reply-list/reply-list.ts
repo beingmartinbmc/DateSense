@@ -21,6 +21,9 @@ export class ReplyList {
   /** Optional context so regeneration stays on-topic. */
   archetype = input<string | undefined>(undefined);
   brutalVerdict = input<string | undefined>(undefined);
+  /** The transcript the analysis reconstructed — without it, rewritten replies
+   * have no conversation to reference and come back generic. */
+  conversationDigest = input<string | undefined>(undefined);
 
   private api = inject(ApiService);
   private analytics = inject(AnalyticsService);
@@ -57,6 +60,7 @@ export class ReplyList {
     this.api
       .regenerateReplies({
         tone,
+        chatMessages: this.conversationDigest(),
         archetype: this.archetype(),
         brutalVerdict: this.brutalVerdict(),
         count: this.replies().length || 5,

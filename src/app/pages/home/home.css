@@ -143,9 +143,18 @@
 
 .action-row {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   margin-top: 28px;
   padding-bottom: 8px;
+}
+
+.quota-hint {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ds-text-soft);
 }
 
 .error-banner {

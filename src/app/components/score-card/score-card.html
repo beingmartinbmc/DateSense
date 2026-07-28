@@ -7,7 +7,14 @@
     <p class="score-value" [ngClass]="color()">
       {{ score() }}<span class="score-percent">%</span>
     </p>
-    <div class="score-bar-track">
+    <div
+      class="score-bar-track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="score()"
+      [attr.aria-label]="label()"
+    >
       <div class="score-bar-fill" [ngClass]="color()" [style.width.%]="score()"></div>
     </div>
   </mat-card-content>

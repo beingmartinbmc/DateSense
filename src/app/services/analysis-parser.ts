@@ -380,6 +380,7 @@ export function normalizeAnalysis(data: any): AnalysisResponse {
     ),
     reply_suggestions: normalizeStringList(data?.reply_suggestions),
     date_ideas: normalizeStringList(data?.date_ideas),
+    conversation_digest: normalizeText(data?.conversation_digest, ''),
   };
 }
 

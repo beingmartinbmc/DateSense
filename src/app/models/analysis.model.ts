@@ -34,6 +34,14 @@ export interface AnalysisResponse {
   next_move: string;
   reply_suggestions: string[];
   date_ideas: string[];
+  /**
+   * A compact reconstruction of the conversation the model actually read.
+   *
+   * Screenshot mode leaves the client with no transcript at all, so without
+   * this, regenerating replies in a new tone had nothing to work from and
+   * produced generic text. Never leaves the device: excluded from share tokens.
+   */
+  conversation_digest: string;
 }
 
 export interface ManualInputData {

@@ -17,6 +17,12 @@
   transform: translateY(-1px);
 }
 
+.upload-zone:focus-visible {
+  outline: 3px solid var(--ds-violet);
+  outline-offset: 3px;
+  border-color: rgba(168, 85, 247, 0.6);
+}
+
 .upload-zone.dragging {
   border-color: var(--ds-pink);
   background: rgba(236, 72, 153, 0.06);

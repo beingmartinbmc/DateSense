@@ -55,7 +55,10 @@ export class ApiService {
   private readonly apiUrl = environment.apiUrl;
 
   private readonly proxyOptions = {
-    maxTokens: 2200,
+    // Headroom for `conversation_digest` (~300 tokens) on top of the report.
+    // Too low and the JSON truncates mid-object, forcing the parser's repair
+    // path and costing us the trailing fields.
+    maxTokens: 2800,
     temperature: 0.2,
     topP: 0.9,
     frequencyPenalty: 0,
