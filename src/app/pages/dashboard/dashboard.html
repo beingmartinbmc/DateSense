@@ -18,6 +18,18 @@
         }
       </div>
 
+      <!-- Be upfront when the evidence was thin, rather than presenting a
+           confident-looking set of numbers the model isn't sure about. -->
+      @if (r.confidence_score < 50) {
+        <div class="confidence-warning" role="status">
+          <mat-icon>info_outline</mat-icon>
+          <span>
+            Low confidence ({{ r.confidence_score }}%) — the conversation was short, cropped or hard
+            to read, so treat these scores as a rough read rather than a verdict.
+          </span>
+        </div>
+      }
+
       <!-- Shareable card -->
       <app-share-card [result]="r" />
 
@@ -31,7 +43,7 @@
         <app-score-card label="Meetup Readiness" [score]="r.meetup_readiness" color="rose" />
       </div>
 
-      <div class="snapshot-grid">
+      <div class="snapshot-grid" [class.single-column]="!r.next_move">
         <mat-card appearance="outlined" class="snapshot-card">
           <mat-card-content>
             <h3 class="section-title">Conversation Snapshot</h3>
@@ -48,16 +60,22 @@
                 <span class="snapshot-label">Risk Level</span>
                 <span class="snapshot-value">{{ r.fake_golddigger_risk }}</span>
               </div>
+              <div class="snapshot-pill">
+                <span class="snapshot-label">Confidence</span>
+                <span class="snapshot-value">{{ r.confidence_score }}%</span>
+              </div>
             </div>
           </mat-card-content>
         </mat-card>
 
-        <mat-card appearance="outlined" class="next-move-card">
-          <mat-card-content>
-            <h3 class="section-title">Recommended Next Move</h3>
-            <p class="next-move-text">{{ r.next_move }}</p>
-          </mat-card-content>
-        </mat-card>
+        @if (r.next_move) {
+          <mat-card appearance="outlined" class="next-move-card">
+            <mat-card-content>
+              <h3 class="section-title">Recommended Next Move</h3>
+              <p class="next-move-text">{{ r.next_move }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
       </div>
 
       <!-- Insights -->
@@ -85,7 +103,9 @@
             <h3 class="risk-title">Fake / Golddigger Risk</h3>
             <span class="risk-badge">{{ r.fake_golddigger_risk }}</span>
           </div>
-          <p class="risk-reason">{{ r.fake_golddigger_reason }}</p>
+          @if (r.fake_golddigger_reason) {
+            <p class="risk-reason">{{ r.fake_golddigger_reason }}</p>
+          }
         </mat-card-content>
       </mat-card>
 
@@ -132,7 +152,8 @@
         <app-reply-list
           [replies]="r.reply_suggestions"
           [archetype]="r.archetype"
-          [brutalVerdict]="r.brutal_verdict" />
+          [brutalVerdict]="r.brutal_verdict"
+          [conversationDigest]="r.conversation_digest" />
       }
 
       <!-- Date Ideas -->

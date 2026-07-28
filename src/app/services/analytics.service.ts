@@ -2,27 +2,25 @@ import { Injectable, isDevMode } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 /**
- * Canonical funnel events. Keeping them centralized means every call site uses
- * the same names, so the dashboard stays meaningful:
- *   page_view → analysis_started → analysis_succeeded → share_*.
+ * Canonical funnel events. Every name here MUST have a live call site —
+ * declaring events nobody fires makes a dashboard look like it has coverage it
+ * doesn't. The loop we care about closes on itself, so `shared_link_opened`
+ * over `share_link_copied` is the viral coefficient:
+ *
+ *   page_view → screenshots_uploaded → analysis_started → analysis_succeeded
+ *             → share_link_copied → shared_link_opened → page_view
  */
 export type AnalyticsEvent =
   | 'page_view'
   | 'demo_clicked'
-  | 'mode_selected'
   | 'screenshots_uploaded'
-  | 'manual_submitted'
   | 'analysis_started'
   | 'analysis_succeeded'
   | 'analysis_failed'
-  | 'analysis_retried'
   | 'reply_copied'
   | 'replies_regenerated'
   | 'share_link_copied'
-  | 'card_downloaded'
-  | 'native_share_used'
-  | 'shared_link_opened'
-  | 'session_cleared';
+  | 'shared_link_opened';
 
 type PlausibleFn = (event: string, opts?: { props?: Record<string, string | number | boolean> }) => void;
 

@@ -117,6 +117,9 @@ export class ResultStore {
         next_move: '',
         reply_suggestions: [],
         date_ideas: [],
+        // Deliberately never encoded into a share token — it is the closest
+        // thing to the raw chat, and shared links must stay content-free.
+        conversation_digest: '',
       };
     } catch {
       return null;

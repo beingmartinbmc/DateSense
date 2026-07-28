@@ -29,6 +29,9 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# Local AI tooling indexes
+/.jambavan
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/
