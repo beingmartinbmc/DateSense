@@ -2,16 +2,21 @@
   class="upload-zone"
   [class.dragging]="isDragging()"
   appearance="outlined"
+  role="button"
+  tabindex="0"
+  aria-label="Upload chat screenshots. Press Enter to browse, or drag and drop files here."
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
   (click)="fileInput.click()"
+  (keydown.enter)="fileInput.click()"
+  (keydown.space)="$event.preventDefault(); fileInput.click()"
 >
   <mat-card-content class="upload-content">
     <input
       #fileInput
       type="file"
-      accept=".png,.jpg,.jpeg"
+      accept="image/png,image/jpeg,image/webp"
       multiple
       style="display:none"
       (change)="onFileInput($event)"
@@ -21,7 +26,7 @@
       <mat-icon class="upload-icon">add_photo_alternate</mat-icon>
     </div>
     <p class="upload-title">Drag & drop your chat screenshots here</p>
-    <p class="upload-subtitle">or click to browse &middot; PNG, JPG up to 10MB &middot; multiple files OK</p>
+    <p class="upload-subtitle">or click to browse &middot; PNG, JPG, WebP up to 10MB &middot; multiple files OK</p>
   </mat-card-content>
 </mat-card>
 

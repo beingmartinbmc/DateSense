@@ -1,47 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { buildScreenshotPrompt, buildManualPrompt, DATESENSE_SYSTEM_CONTEXT } from '../prompt';
+import { Observable, map, retry, timer, throwError, timeout } from 'rxjs';
+import {
+  buildScreenshotPrompt,
+  buildManualPrompt,
+  buildReplyTonePrompt,
+  DATESENSE_SYSTEM_CONTEXT,
+} from '../prompt';
+import { parseAnalysisResponse, normalizeStringList, parseJsonPayload, extractContent } from './analysis-parser';
+import {
+  AnalysisResponse,
+  ConversationMomentum,
+  ConversationStage,
+  ManualInputData,
+  ReplyTone,
+} from '../models/analysis.model';
+import { environment } from '../../environments/environment';
 
-export type ConversationStage = 'Opening' | 'Building Rapport' | 'Momentum Window' | 'Stalling' | 'Dead' | 'Unknown';
-
-export type ConversationMomentum = 'Rising' | 'Flat' | 'Fading' | 'Unknown';
-
-export interface AnalysisResponse {
-  attraction_score: number;
-  ghosting_risk: number;
-  conversation_health: number;
-  response_effort_balance: number;
-  meetup_readiness: number;
-  confidence_score: number;
-  rizz_score: number;
-  conversation_stage: ConversationStage;
-  momentum: ConversationMomentum;
-  archetype: string;
-  brutal_verdict: string;
-  rizz_roast: string;
-  insights: string[];
-  green_flags: string[];
-  red_flags: string[];
-  fake_golddigger_risk: string;
-  fake_golddigger_reason: string;
-  next_move: string;
-  reply_suggestions: string[];
-  date_ideas: string[];
-}
-
-export interface ManualInputData {
-  yourName?: string;
-  theirName?: string;
-  yourAge?: string;
-  theirAge?: string;
-  platform?: string;
-  chatDuration?: string;
-  chatMessages: string;
-  yourBio?: string;
-  theirBio?: string;
-  additionalContext?: string;
-}
+// Re-export domain types from their canonical home so existing imports
+// (`from '../../services/api.service'`) keep working unchanged.
+export type {
+  AnalysisResponse,
+  ConversationMomentum,
+  ConversationStage,
+  ManualInputData,
+  ReplyTone,
+} from '../models/analysis.model';
 
 type OpenAiMessageContent =
   | string
@@ -68,11 +52,13 @@ interface OpenAiProxyRequest {
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly apiUrl =
-    'https://ai-gateway-production-0388.up.railway.app/api/v1/openai-proxy';
+  private readonly apiUrl = environment.apiUrl;
 
   private readonly proxyOptions = {
-    maxTokens: 2200,
+    // Headroom for `conversation_digest` (~300 tokens) on top of the report.
+    // Too low and the JSON truncates mid-object, forcing the parser's repair
+    // path and costing us the trailing fields.
+    maxTokens: 2800,
     temperature: 0.2,
     topP: 0.9,
     frequencyPenalty: 0,
@@ -109,7 +95,7 @@ export class ApiService {
 
           this.http
             .post<any>(this.apiUrl, body)
-            .pipe(map((res) => this.parseResponse(res)))
+            .pipe(this.resilientPipe(), map((res) => this.parseResponse(res)))
             .subscribe({
               next: (v) => { subscriber.next(v); subscriber.complete(); },
               error: (e) => subscriber.error(e),
@@ -197,6 +183,7 @@ export class ApiService {
       yourBio: data.yourBio,
       theirBio: data.theirBio,
       additionalContext: data.additionalContext,
+      goal: data.goal,
     });
 
     const body = this.buildProxyRequest([
@@ -206,422 +193,100 @@ export class ApiService {
 
     return this.http
       .post<any>(this.apiUrl, body)
-      .pipe(map((res) => this.parseResponse(res)));
+      .pipe(this.resilientPipe(), map((res) => this.parseResponse(res)));
   }
 
-  private buildProxyRequest(messages: OpenAiProxyMessage[]): OpenAiProxyRequest {
-    return {
-      messages,
-      ...this.proxyOptions,
-    };
-  }
+  /**
+   * Regenerate ONLY the reply suggestions in a different tone, reusing the
+   * conversation context the user already provided. Cheaper + faster than a
+   * full re-analysis, and keeps the rest of the report stable.
+   */
+  regenerateReplies(input: {
+    tone: ReplyTone;
+    chatMessages?: string;
+    archetype?: string;
+    brutalVerdict?: string;
+    count?: number;
+  }): Observable<string[]> {
+    const prompt = buildReplyTonePrompt({
+      tone: input.tone,
+      chatMessages: input.chatMessages,
+      archetype: input.archetype,
+      brutalVerdict: input.brutalVerdict,
+      count: input.count,
+    });
 
-  private parseResponse(raw: any): AnalysisResponse {
-    const content = this.extractContent(raw);
-    const data = this.parseJsonPayload(content);
+    const body = this.buildProxyRequest(
+      [
+        { role: 'system', content: DATESENSE_SYSTEM_CONTEXT },
+        { role: 'user', content: prompt },
+      ],
+      // A touch more warmth/variety for creative reply writing.
+      { temperature: 0.8, maxTokens: 700 },
+    );
 
-    return {
-      attraction_score: this.normalizeScore(data.attraction_score),
-      ghosting_risk: this.normalizeScore(data.ghosting_risk),
-      conversation_health: this.normalizeScore(data.conversation_health),
-      response_effort_balance: this.normalizeScore(data.response_effort_balance),
-      meetup_readiness: this.normalizeScore(data.meetup_readiness),
-      confidence_score: this.normalizeScore(data.confidence_score),
-      rizz_score: this.normalizeScore(data.rizz_score),
-      conversation_stage: this.normalizeStage(data.conversation_stage),
-      momentum: this.normalizeMomentum(data.momentum),
-      archetype: this.normalizeText(data.archetype, 'Mixed Signals'),
-      brutal_verdict: this.normalizeText(data.brutal_verdict, 'Too little to go on — give it another exchange before reading the tea leaves.'),
-      rizz_roast: this.normalizeText(data.rizz_roast, 'Not enough to roast yet — send a few more messages and try again.'),
-      insights: this.normalizeStringList(data.insights),
-      green_flags: this.normalizeStringList(data.green_flags),
-      red_flags: this.normalizeStringList(data.red_flags),
-      fake_golddigger_risk: this.normalizeRisk(data.fake_golddigger_risk),
-      fake_golddigger_reason: this.normalizeText(data.fake_golddigger_reason, 'No red flags detected'),
-      next_move: this.normalizeText(data.next_move, 'Keep the conversation simple and wait for clearer signals before forcing the next step.'),
-      reply_suggestions: this.normalizeStringList(data.reply_suggestions),
-      date_ideas: this.normalizeStringList(data.date_ideas),
-    };
-  }
-
-  private extractContent(raw: any): string {
-    const root = raw?.data ?? raw;
-    const candidates = [
-      root?.choices?.[0]?.message?.content,
-      root?.output?.[0]?.content,
-      root?.output,
-      root?.output_text,
-      root?.text,
-      root?.content,
-      this.looksLikeAnalysisObject(root) ? JSON.stringify(root) : null,
-      this.looksLikeAnalysisObject(raw) ? JSON.stringify(raw) : null,
-      typeof raw === 'string' ? raw : null,
-    ];
-
-    for (const candidate of candidates) {
-      const normalized = this.stringifyContent(candidate);
-      if (normalized) {
-        return normalized;
-      }
-    }
-
-    throw new Error('Could not extract AI response');
-  }
-
-  private stringifyContent(value: unknown): string {
-    if (typeof value === 'string') {
-      return value.trim();
-    }
-
-    if (!Array.isArray(value)) {
-      return '';
-    }
-
-    return value
-      .map((item) => {
-        if (typeof item === 'string') {
-          return item;
+    return this.http.post<any>(this.apiUrl, body).pipe(
+      this.resilientPipe(),
+      map((res) => {
+        const content = extractContent(res);
+        const data = parseJsonPayload(content);
+        const replies = normalizeStringList(data?.reply_suggestions);
+        if (replies.length === 0) {
+          throw new Error('The AI did not return any replies. Please retry.');
         }
-
-        if (!item || typeof item !== 'object') {
-          return '';
-        }
-
-        if ('text' in item && typeof item.text === 'string') {
-          return item.text;
-        }
-
-        if ('content' in item) {
-          return this.stringifyContent(item.content);
-        }
-
-        return '';
-      })
-      .join('\n')
-      .trim();
-  }
-
-  private parseJsonPayload(content: string): any {
-    const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-    const repaired = this.repairPrematureObjectClose(cleaned);
-    const extracted = this.extractJsonObject(cleaned);
-    const repairedExtracted = this.extractJsonObject(repaired);
-
-    const candidates = [
-      cleaned,
-      repaired,
-      repairedExtracted,
-      extracted,
-      this.normalizeLikelyJson(repaired),
-      this.normalizeLikelyJson(cleaned),
-      repairedExtracted ? this.normalizeLikelyJson(repairedExtracted) : null,
-      extracted ? this.normalizeLikelyJson(extracted) : null,
-    ].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0);
-
-    for (const candidate of candidates) {
-      const parsed = this.tryParseJson(candidate);
-      if (parsed) {
-        return parsed;
-      }
-    }
-
-    throw new Error('The AI returned an invalid response format. Please retry.');
-  }
-
-  private repairPrematureObjectClose(text: string): string {
-    let out = '';
-    let depth = 0;
-    let inString = false;
-    let escaped = false;
-    let i = 0;
-    const len = text.length;
-
-    while (i < len) {
-      const ch = text[i];
-
-      if (inString) {
-        out += ch;
-        if (escaped) {
-          escaped = false;
-        } else if (ch === '\\') {
-          escaped = true;
-        } else if (ch === '"') {
-          inString = false;
-        }
-        i += 1;
-        continue;
-      }
-
-      if (ch === '"') {
-        inString = true;
-        out += ch;
-        i += 1;
-        continue;
-      }
-
-      if (ch === '{' || ch === '[') {
-        depth += 1;
-        out += ch;
-        i += 1;
-        continue;
-      }
-
-      if (ch === '}' && depth === 1) {
-        let j = i + 1;
-        while (j < len && /\s/.test(text[j])) {
-          j += 1;
-        }
-
-        if (j < len && text[j] === ',') {
-          let k = j + 1;
-          while (k < len && /\s/.test(text[k])) {
-            k += 1;
-          }
-          if (k < len && text[k] === '"') {
-            i += 1;
-            continue;
-          }
-        } else if (j < len && text[j] === '"') {
-          out += ',';
-          i += 1;
-          continue;
-        }
-      }
-
-      if (ch === '}' || ch === ']') {
-        depth -= 1;
-        out += ch;
-        i += 1;
-        continue;
-      }
-
-      out += ch;
-      i += 1;
-    }
-
-    return out;
-  }
-
-  private tryParseJson(text: string): any | null {
-    try {
-      return JSON.parse(text);
-    } catch {
-      return null;
-    }
-  }
-
-  private extractJsonObject(text: string): string | null {
-    let depth = 0;
-    let start = -1;
-    let inString = false;
-    let escaped = false;
-
-    for (let index = 0; index < text.length; index += 1) {
-      const char = text[index];
-
-      if (inString) {
-        if (escaped) {
-          escaped = false;
-          continue;
-        }
-
-        if (char === '\\') {
-          escaped = true;
-          continue;
-        }
-
-        if (char === '"') {
-          inString = false;
-        }
-
-        continue;
-      }
-
-      if (char === '"') {
-        inString = true;
-        continue;
-      }
-
-      if (char === '{') {
-        if (depth === 0) {
-          start = index;
-        }
-        depth += 1;
-        continue;
-      }
-
-      if (char === '}' && depth > 0) {
-        depth -= 1;
-        if (depth === 0 && start !== -1) {
-          return text.slice(start, index + 1);
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private normalizeLikelyJson(text: string): string {
-    const apostropheNormalized = text.replace(/[\u2018\u2019]/g, "'");
-    const quoteRewritten = this.rewriteCurlyStrings(apostropheNormalized);
-    return this.insertMissingArrayCommas(quoteRewritten);
-  }
-
-  private rewriteCurlyStrings(text: string): string {
-    let out = '';
-    let i = 0;
-    const len = text.length;
-
-    while (i < len) {
-      const ch = text[i];
-
-      if (ch === '"') {
-        const start = i;
-        i += 1;
-        while (i < len) {
-          const c = text[i];
-          if (c === '\\') {
-            i += 2;
-            continue;
-          }
-          if (c === '"') {
-            i += 1;
-            break;
-          }
-          i += 1;
-        }
-        out += text.slice(start, i);
-        continue;
-      }
-
-      if (ch === '\u201C') {
-        i += 1;
-        let content = '';
-        while (i < len && text[i] !== '\u201D') {
-          const c = text[i];
-          if (c === '\\' || c === '"') {
-            content += '\\' + c;
-          } else {
-            content += c;
-          }
-          i += 1;
-        }
-        if (i < len) {
-          i += 1;
-        }
-        out += '"' + content + '"';
-        continue;
-      }
-
-      out += ch;
-      i += 1;
-    }
-
-    return out;
-  }
-
-  private insertMissingArrayCommas(text: string): string {
-    let out = '';
-    let i = 0;
-    const len = text.length;
-
-    while (i < len) {
-      const ch = text[i];
-
-      if (ch === '"') {
-        const start = i;
-        i += 1;
-        while (i < len) {
-          const c = text[i];
-          if (c === '\\') {
-            i += 2;
-            continue;
-          }
-          if (c === '"') {
-            i += 1;
-            break;
-          }
-          i += 1;
-        }
-        out += text.slice(start, i);
-
-        let j = i;
-        while (j < len && /\s/.test(text[j])) {
-          j += 1;
-        }
-        if (j < len && text[j] === '"') {
-          out += ',';
-        }
-        continue;
-      }
-
-      out += ch;
-      i += 1;
-    }
-
-    return out;
-  }
-
-  private looksLikeAnalysisObject(value: unknown): value is Record<string, unknown> {
-    return !!value && typeof value === 'object' && !Array.isArray(value) && (
-      'conversation_health' in value ||
-      'attraction_score' in value ||
-      'ghosting_risk' in value ||
-      'reply_suggestions' in value
+        return replies;
+      }),
     );
   }
 
-  private normalizeScore(value: unknown): number {
-    const score = Number(value);
-    if (!Number.isFinite(score)) {
-      return 0;
-    }
-
-    return Math.max(0, Math.min(100, Math.round(score)));
+  private buildProxyRequest(
+    messages: OpenAiProxyMessage[],
+    overrides?: Partial<typeof this.proxyOptions>,
+  ): OpenAiProxyRequest {
+    return {
+      messages,
+      ...this.proxyOptions,
+      ...overrides,
+    };
   }
 
-  private normalizeStringList(value: unknown): string[] {
-    if (typeof value === 'string') {
-      return value
-        .split(/\n+/)
-        .map((item) => item.replace(/^[-*•\s]+/, '').trim())
-        .filter((item) => item.length > 0);
-    }
-
-    if (!Array.isArray(value)) {
-      return [];
-    }
-
-    return value
-      .filter((item): item is string => typeof item === 'string')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
+  /**
+   * Shared resilience operators for every gateway call:
+   *  - a hard per-request timeout so a hung gateway can't freeze the UI, and
+   *  - bounded retries with exponential backoff + jitter for transient faults
+   *    (network errors, 429s, and 5xx). 4xx (except 429) are NOT retried since
+   *    they won't succeed on a repeat.
+   */
+  private resilientPipe<T>() {
+    return (source: Observable<T>): Observable<T> =>
+      source.pipe(
+        timeout(environment.requestTimeoutMs),
+        retry({
+          count: environment.maxRetries,
+          delay: (error, retryCount) => {
+            if (!this.isRetryable(error)) {
+              return throwError(() => error);
+            }
+            const backoff = environment.retryBaseDelayMs * Math.pow(2, retryCount - 1);
+            const jitter = Math.random() * environment.retryBaseDelayMs;
+            return timer(backoff + jitter);
+          },
+        }),
+      );
   }
 
-  private normalizeText(value: unknown, fallback: string): string {
-    if (typeof value !== 'string') {
-      return fallback;
-    }
-
-    const normalized = value.trim();
-    return normalized.length > 0 ? normalized : fallback;
+  private isRetryable(error: any): boolean {
+    // RxJS TimeoutError → worth one more shot.
+    if (error?.name === 'TimeoutError') return true;
+    const status = error?.status;
+    // No status usually means a network/CORS failure (status 0).
+    if (status === undefined || status === null) return true;
+    if (status === 0) return true;
+    if (status === 429) return true;
+    return status >= 500 && status < 600;
   }
 
-  private normalizeRisk(value: unknown): string {
-    const allowed = ['None', 'Low', 'Medium', 'High'];
-    const normalized = this.normalizeText(value, 'None');
-    return allowed.includes(normalized) ? normalized : 'None';
-  }
-
-  private normalizeStage(value: unknown): ConversationStage {
-    const allowed: ConversationStage[] = ['Opening', 'Building Rapport', 'Momentum Window', 'Stalling', 'Dead', 'Unknown'];
-    const normalized = this.normalizeText(value, 'Unknown') as ConversationStage;
-    return allowed.includes(normalized) ? normalized : 'Unknown';
-  }
-
-  private normalizeMomentum(value: unknown): ConversationMomentum {
-    const allowed: ConversationMomentum[] = ['Rising', 'Flat', 'Fading', 'Unknown'];
-    const normalized = this.normalizeText(value, 'Unknown') as ConversationMomentum;
-    return allowed.includes(normalized) ? normalized : 'Unknown';
+  private parseResponse(raw: any): AnalysisResponse {
+    return parseAnalysisResponse(raw);
   }
 }

@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { UploadArea } from '../../components/upload-area/upload-area';
 import { ImagePreview } from '../../components/image-preview/image-preview';
 import { ApiService, AnalysisResponse, ManualInputData } from '../../services/api.service';
+import { UsageGuardService } from '../../services/usage-guard.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import { SAMPLE_CHAT } from '../../sample-chat';
 
 export interface FilePreview {
@@ -28,6 +30,8 @@ export class Home implements OnInit, OnDestroy {
   isLoading = signal(false);
   loadingMessage = signal('');
   errorMessage = signal<string | null>(null);
+  /** Analyses left in today's soft quota, surfaced once it starts running out. */
+  quotaRemaining = signal(Number.POSITIVE_INFINITY);
 
   /** Platform-aware keyboard hint for the paste tip. */
   readonly pasteShortcut = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -44,10 +48,19 @@ export class Home implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private router: Router,
+    private usageGuard: UsageGuardService,
+    private analytics: AnalyticsService,
   ) {}
 
   ngOnInit(): void {
+    this.analytics.track('page_view', { page: 'home' });
+    this.refreshQuota();
     this.incrementFlagCounter();
+  }
+
+  private refreshQuota(): void {
+    const quota = this.usageGuard.getQuota();
+    this.quotaRemaining.set(Math.max(0, quota.limit - quota.used));
   }
 
   private incrementFlagCounter(): void {
@@ -69,6 +82,7 @@ export class Home implements OnInit, OnDestroy {
       url: URL.createObjectURL(file),
     }));
     this.filePreviews.update((existing) => [...existing, ...newPreviews]);
+    this.analytics.track('screenshots_uploaded', { count: files.length });
   }
 
   removeFile(index: number): void {
@@ -82,6 +96,7 @@ export class Home implements OnInit, OnDestroy {
   /** Run the analysis on a built-in demo conversation — zero friction for first-timers. */
   tryDemo(): void {
     this.errorMessage.set(null);
+    this.analytics.track('demo_clicked');
     this.analyzeManual(SAMPLE_CHAT);
   }
 
@@ -115,6 +130,17 @@ export class Home implements OnInit, OnDestroy {
     const previews = this.filePreviews();
     if (previews.length === 0) return;
 
+    // Client-side anti-spam guard (cooldown + soft daily quota). This is UX /
+    // defense-in-depth only — the gateway is the real enforcement point.
+    const block = this.usageGuard.blockReason();
+    if (block) {
+      this.errorMessage.set(block);
+      this.analytics.track('analysis_failed', { reason: 'rate_limited', mode: 'screenshots' });
+      return;
+    }
+    this.usageGuard.recordAnalysis();
+    this.refreshQuota();
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.cycleLoadingMessages();
@@ -122,9 +148,12 @@ export class Home implements OnInit, OnDestroy {
     const files = previews.map((p) => p.file);
     const imageUrls = previews.map((p) => p.url);
 
+    this.analytics.track('analysis_started', { mode: 'screenshots', files: files.length });
+
     this.apiService.analyzeScreenshots(files).subscribe({
       next: (response: AnalysisResponse) => {
         this.isLoading.set(false);
+        this.analytics.track('analysis_succeeded', { mode: 'screenshots' });
         this.router.navigate(['/dashboard'], {
           state: { result: response, imageUrls },
         });
@@ -132,19 +161,32 @@ export class Home implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Screenshot analysis failed', error);
         this.isLoading.set(false);
+        this.analytics.track('analysis_failed', { mode: 'screenshots', reason: 'request_error' });
         this.errorMessage.set(this.getErrorMessage(error));
       },
     });
   }
 
   private analyzeManual(data: ManualInputData): void {
+    const block = this.usageGuard.blockReason();
+    if (block) {
+      this.errorMessage.set(block);
+      this.analytics.track('analysis_failed', { reason: 'rate_limited', mode: 'manual' });
+      return;
+    }
+    this.usageGuard.recordAnalysis();
+    this.refreshQuota();
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.cycleLoadingMessages();
 
+    this.analytics.track('analysis_started', { mode: 'manual' });
+
     this.apiService.analyzeManual(data).subscribe({
       next: (response: AnalysisResponse) => {
         this.isLoading.set(false);
+        this.analytics.track('analysis_succeeded', { mode: 'manual' });
         this.router.navigate(['/dashboard'], {
           state: { result: response },
         });
@@ -152,6 +194,7 @@ export class Home implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Manual analysis failed', error);
         this.isLoading.set(false);
+        this.analytics.track('analysis_failed', { mode: 'manual', reason: 'request_error' });
         this.errorMessage.set(this.getErrorMessage(error));
       },
     });
