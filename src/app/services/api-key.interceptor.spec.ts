@@ -23,8 +23,8 @@ describe('apiKeyInterceptor', () => {
   });
 
   it('sends X-API-Key on gateway requests when a key is configured', () => {
-    environment.apiKey = 'agw_test_key';
-    expect(intercept(environment.apiUrl).headers.get('X-API-Key')).toBe('agw_test_key');
+    environment.apiKey = 'test-key';
+    expect(intercept(environment.apiUrl).headers.get('X-API-Key')).toBe('test-key');
   });
 
   it('omits the header entirely when no key is configured', () => {
@@ -38,7 +38,7 @@ describe('apiKeyInterceptor', () => {
   });
 
   it('never leaks the key to other hosts', () => {
-    environment.apiKey = 'agw_test_key';
+    environment.apiKey = 'test-key';
     expect(intercept('https://plausible.io/api/event').headers.has('X-API-Key')).toBe(false);
   });
 });
