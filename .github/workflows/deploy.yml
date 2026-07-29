@@ -33,6 +33,18 @@ jobs:
     - name: Run tests
       run: npm test
 
+    # The gateway rejects unauthenticated /api calls with 401, so the key has to
+    # reach the bundle. It is substituted here rather than committed: this repo
+    # is public. Fail loudly if it is missing, otherwise we would ship a build
+    # that 401s for every visitor.
+    - name: Inject AI Gateway API key
+      env:
+        AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+      run: |
+        test -n "$AI_GATEWAY_API_KEY" || { echo "::error::AI_GATEWAY_API_KEY secret is not set"; exit 1; }
+        grep -q '__AI_GATEWAY_API_KEY__' src/environments/environment.prod.ts
+        sed -i "s|__AI_GATEWAY_API_KEY__|$AI_GATEWAY_API_KEY|" src/environments/environment.prod.ts
+
     - name: Build application
       run: npx ng build --base-href /DateSense/
 

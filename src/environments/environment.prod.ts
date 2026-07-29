@@ -9,6 +9,12 @@
 export const environment = {
   production: true,
   apiUrl: 'https://ai-gateway-production-0388.up.railway.app/api/v1/openai-proxy',
+  /**
+   * Placeholder token. The deploy workflow substitutes the real key here from
+   * the AI_GATEWAY_API_KEY secret, so it never lands in this public repo. An
+   * unsubstituted token is treated as "no key" by the interceptor.
+   */
+  apiKey: '__AI_GATEWAY_API_KEY__',
   requestTimeoutMs: 45_000,
   maxRetries: 2,
   retryBaseDelayMs: 800,

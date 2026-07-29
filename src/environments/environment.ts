@@ -14,6 +14,12 @@ export const environment = {
   production: false,
   /** Base URL of the OpenAI proxy gateway. */
   apiUrl: 'https://ai-gateway-production-0388.up.railway.app/api/v1/openai-proxy',
+  /**
+   * Gateway API key. Empty locally: without it the gateway answers 401, which
+   * is a far more honest failure than sending a bogus header. Production gets
+   * the real value injected at build time (see environment.prod.ts).
+   */
+  apiKey: '',
   /** Per-request timeout (ms) before we abort and surface a friendly error. */
   requestTimeoutMs: 45_000,
   /** Max automatic retries for transient (5xx / 429 / network) failures. */
